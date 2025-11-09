@@ -3,3 +3,78 @@ title: Data Cleaning
 format: typst
 ---
 
+```{r}
+#| echo: false
+#| warning: false
+
+library(tidyverse)
+library(stringr)
+```
+
+# Cleaning the SVPrecinct data
+
+From the website : - CNG stangs for "Congressionnal" - There can be several candidates within each district. This is what we care about. - CDDIST is the congressional district number - SVPREC is the precinct identifier
+
+# Simplifying the dataset
+
+We can first select the columns we care about. 
+
+```{r}
+svprecinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/g24_sov_by_g24_svprec.csv")
+
+sv_precinct <- svprecinct |>
+    select(COUNTY, SVPREC, CDDIST, TOTVOTE, CNGDEM01, CNGDEM02, CNGREP01, CNGREP02)
+
+
+
+```
+
+We can also rename columns:
+
+```{r}
+sv_precinct <- sv_precinct |>
+    rename(DEM01= CNGDEM01, 
+    DEM02 = CNGDEM02,
+    REP01 = CNGREP01,
+    REP02 = CNGREP02, 
+    DISTRICT = CDDIST
+          )
+```
+
+For our analysis, we particularly want to focus on precinct with sometype of democrat / republican competition. So why do we care about about the DEM02 and REP02 columns? Because there are the best proxy to filter out the cases when there are competition. Notice when you have two democratic candidates, then it means you do not have a republican candidate! 
+
+## Pattern recognition within column.
+
+Notice CNGs columns are strings. We need to clean that!
+
+```{r}
+sv_precinct <- sv_precinct  |>
+    mutate(DEM01 = as.double(str_extract_all(DEM01, "\\d+")),
+           DEM02 = as.double(str_extract_all(DEM02, "\\d+")),
+           REP01 = as.double(str_extract_all(REP01, "\\d+")),
+           REP02 = as.double(str_extract_all(REP02, "\\d+")))
+
+```
+
+## Getting rid of irrelevant columns. 
+
+Notice there are some precinct with no competition (only voting for democratic candidates or republican candidates). For the sake of our analysis, we choose to disregard them. To simplify our analysis, we want a total vote column that only consider democrat and republican votes. 
+
+```{r}
+sv_precinct <- sv_precinct |>
+    filter(!(REP01 == 0 & REP02 == 0),
+    !(DEM01 == 0 & DEM02 == 0))
+
+sv_precinct <- sv_precinct |>
+    select(-c(DEM02, REP02))
+
+sv_precinct <- sv_precinct |>
+    mutate(TOTVOTE = REP01 + DEM01)
+```
+
+
+# Saving the cleaned dataset
+
+```{r}
+write.csv(sv_precinct, "Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv", row.names = FALSE)
+```

@@ -3,9 +3,77 @@ title: Gerrymandering Metrics
 format: typst
 ---
 
-### 2024 Election Results and the 2024 District Map
+```{r}
+#| echo: false 
+#| warning: false
+library(tidyverse)
+library(boot)
+sv_precinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
+
+```
+
+# 2024 Election Results and the 2024 District Map
+
+## Metrics
+
+### Mean-Median approach: 
+
+```{r}
+district_level <-  sv_precinct |>
+    group_by(DISTRICT)|>
+    summarize(DEM01 = sum(DEM01, na.rm= T), 
+    REP01 = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE))
+
+# Now we can just compute our score : 
+
+district_vi <- district_level |>
+    mutate(v_i = DEM01 / (TOTVOTE))
+
+district_vi |> 
+    summarize(democratscore = mean(v_i)-median(v_i))
+```
+
+The mean-median score is of -0.00759. But we don't really know what to compare it to! It seems there is a very small negative score in defavor of democrats. 
+
+#### Side quest : *Is the mean median score statistically significant ?*
+
+```{r}
+# We define a function that can compute that systematically on a bootstrap test: 
+
+democratscore_fn <- function(data, index) {
+  d <- data[index, ]
+  mean(d$v_i) - median(d$v_i)
+}
+set.seed(123)
+boot_res <- boot(district_vi, democratscore_fn, R = 2000)
+
+boot.ci(boot_res, type = "perc")
+```
+
+The CI interval reveals there is no statistical significance on this measure ! 
+
+### Efficiency Score
+
+```{r}
+n_wasted <- function(by, against) {
+    w_threshold <- floor((by + against) / 2) + 1
+    n_wasted <- ifelse(by > against, by - w_threshold, by)
+    n_wasted
+}
+district_level |>
+mutate(wasted_D = n_wasted(DEM01, REP01),
+      wasted_R = n_wasted(REP01, DEM01))|>
+summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
+
+```
+
+
+## Map ! 
 
 
 
-### 2024 Election Results and the proposed 2025 District Map
+
+
+# 2024 Election Results and the proposed 2025 District Map
 

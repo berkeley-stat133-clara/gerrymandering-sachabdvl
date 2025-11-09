@@ -1,28 +1,95 @@
 ---
 title: Exploratory Data Analysis
-format: typst
+format: html
+author : Sacha Bondeville
 ---
+
+```{r}
+library(tidyverse)
+library(boot)
+library(plotly)
+sv_precinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
+
+```
+
 
 ### Question 1
 
-Put your question here.
+*What is the total distribution of vote counts at **the county level** ?*
+
 
 ### Answer 1
 
-Put your answer here.
+```{r}
 
-### Question 2
+county_level <-  sv_precinct |>
+    group_by(COUNTY)|>
+    summarize(DEM01 = sum(DEM01, na.rm= T), 
+    REP01 = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE))|>
+        mutate(WINNER= ifelse(DEM01 > REP01, "DEM", "REP"))
 
-Put your question here.
+county_level |>
+    ggplot(aes(x = TOTVOTE))+geom_histogram(fill = "goldenrod")+ 
+    labs(title = "Distribution of votes", 
+    x = "#Total votes", 
+    y  = "Count")+
+    theme_minimal(base_family = "Arial")
 
-### Answer 2
+```
 
-Put your answer here.
 
-### Question 3
+### Question 2 : 
+What is the association between number of democrat vote and number of republican vote at the county level ? 
 
-Put your question here.
+### Answer 2: 
 
-### Answer 3
+```{r}
 
-Put your answer here.
+
+
+m1 <- lm(REP01~DEM01, data = county_level)
+
+g1 <-  county_level |>
+    ggplot(aes(x = DEM01, y = REP01))+
+    geom_smooth(method = "lm", color = "lightblue", se = F)+
+    geom_point(aes(text = paste(
+    "COUNTY:", COUNTY,
+    "<br>Democrat votes:", DEM01,
+    "<br>Republican votes:", REP01,
+    "<br>Total votes:", TOTVOTE), color = WINNER))+
+    scale_color_manual(
+    values = c(
+      "DEM" = "#6090F7",
+      "REP" = "#FA6E52"))+ 
+    theme_minimal(base_family = "Arial")+
+    labs(title = "Association: democrat and republican vote", 
+    x = "# of Democrat votes", 
+    y = "# of Republican votes", 
+    caption = paste("the slope coefficient of our linear model is of :",round(m1[[1]][2], 4)))
+
+ggplotly(g1)
+```
+
+### Question 3: 
+
+*What is the county with the highest number of republican votes given their number of democrat votes ?* 
+
+### Answer 3: 
+
+```{r}
+county_level |>
+    mutate(residual = resid(m1))|>
+    arrange(desc(residual))|>
+    select(COUNTY)|>
+    slice(1)
+```
+
+The Orange County has the highest number of republican votes given democrat votes, which is not that surprising given the disparity of its social groups. 
+
+
+
+
+
+
+
