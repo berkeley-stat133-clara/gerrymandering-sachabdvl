@@ -3,6 +3,7 @@ title: Prop50 impact analysis
 format: 
     dashboard: 
         theme : zephyr
+        card-style: none
 author : Sacha Bondeville
 ---
 
@@ -381,12 +382,54 @@ Here are where I found the datasets used for this analysis :
 -   2024 Election Geographic Data (<https://statewidedatabase.org/d20/g24_geo_conv.html>): source of shapefiles for precinct maps from 2024 General Election.
 -   Proposed Congressional Map (<https://aelc.assembly.ca.gov/proposed-congressional-map>): source of shapefiles for district map proposed in AB 604.
 
-## Data Cleaning methodology: 
+## Data Cleaning methodology
 
-Here is the code used for the cleaning process. It mostly just relies on simple pattern recognition, and column selection.
+Here is the code used for the cleaning process. It mostly just relies on simple pattern recognition, and column selection:
 
-```{r}
-#|eval : false
+<button onclick="window.open('https://sacha-bondeville.quarto.pub/data-cleaning-gerrymandering/', '_blank')" 
+        style="padding:10px 20px; background-color:#0078d7; color:white; border:none; border-radius:6px; cursor:pointer;">
+  📄 Open PDF Report
+</button>
 
+## Gerrymandering metrics documentation: 
+
+**Mean-Median Score:**
+Here is the code used to compute this metric : 
+
+```r
+
+district_vi <- district_level |>
+    filter(DEM02 == 0 & REP02 == 0)|>
+    mutate(v_i = DEM01 / (TOTVOTE))
+
+mean_median <- district_vi |> 
+    summarize(democratscore = mean(v_i)-median(v_i))
 
 ```
+
+It follows the following formula : 
+Suppose we observe an election where the vote share for Republicans in each of 𝑛 districts is 𝑣1,…,𝑣𝑁.
+The mean-median score is:
+𝑀=mean(𝑣𝑖)−median(𝑣𝑖)
+
+**Efficiency score:**
+Here is the code used to compute this metric : 
+
+```r
+
+ES <- district_vi |>
+mutate(wasted_D = n_wasted(DEM01, REP01),
+      wasted_R = n_wasted(REP01, DEM01))|>
+summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
+
+```
+It follows the following logic: 
+
+Suppose two parties, A and B. The efficiency gap (EG) favoring party A for a given pattern of votes, is defined as the difference in wasted votes divided by the total number of votes:
+
+$EG = \frac{W_B - W_A}{T}$
+
+Where 𝑊𝐵 is the number of wasted votes by Party B, 𝑊𝐴 is the number of wasted votes by Party A, and 𝑇 is the total votes cast.
+
+
+
