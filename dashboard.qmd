@@ -432,4 +432,3 @@ $EG = \frac{W_B - W_A}{T}$
 Where 𝑊𝐵 is the number of wasted votes by Party B, 𝑊𝐴 is the number of wasted votes by Party A, and 𝑇 is the total votes cast.
 
 
-
