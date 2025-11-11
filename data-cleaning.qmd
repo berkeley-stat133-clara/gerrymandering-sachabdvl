@@ -13,14 +13,14 @@ library(stringr)
 
 # Cleaning the SVPrecinct data
 
-From the website : - CNG stangs for "Congressionnal" - There can be several candidates within each district. This is what we care about. - CDDIST is the congressional district number - SVPREC is the precinct identifier
+From the website : - CNG stands for "Congressionnal" - There can be several candidates within each district. This is what we care about. - CDDIST is the congressional district number - SVPREC is the precinct identifier
 
 ## Simplifying the dataset
 
 We can first select the columns we care about. 
 
 ```{r}
-svprecinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/g24_sov_by_g24_svprec.csv")
+svprecinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/g24_sov_by_g24_svprec.csv")
 
 sv_precinct <- svprecinct |>
     select(COUNTY, SVPREC, CDDIST, TOTVOTE, CNGDEM01, CNGDEM02, CNGREP01, CNGREP02)
@@ -79,7 +79,7 @@ sv_precinct <- sv_precinct|>
 ## Saving the cleaned dataset
 
 ```{r}
-write.csv(sv_precinct, "Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv", row.names = FALSE)
+write.csv(sv_precinct, "/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv", row.names = FALSE)
 ```
 
 # Cleaning the SRPrecinct file 

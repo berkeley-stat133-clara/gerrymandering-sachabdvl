@@ -112,8 +112,8 @@ ab604 <- ab604 |>
 sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
 
 block_prop <- sr_precinct |>
-    mutate(PROP_DEM_BLOCK = DEM/sum(DEM),
-    PROP_REP_BLOCK = REP/(sum(REP)),
+    mutate(PROP_DEM_BLOCK = (DEM/sum(DEM))*(PCTSRPREC/100),
+    PROP_REP_BLOCK = (REP/(sum(REP)))*(PCTSRPREC/100),
     .by = SRPREC_KEY)|>
     mutate(BLOCK_WEIGHTED_DEM = (DEM01+DEM02)*PROP_DEM_BLOCK,
     BLOCK_WEIGHTED_REP = (REP01+REP02)*PROP_REP_BLOCK)
@@ -381,6 +381,12 @@ Here are where I found the datasets used for this analysis :
 -   2024 Election Geographic Data (<https://statewidedatabase.org/d20/g24_geo_conv.html>): source of shapefiles for precinct maps from 2024 General Election.
 -   Proposed Congressional Map (<https://aelc.assembly.ca.gov/proposed-congressional-map>): source of shapefiles for district map proposed in AB 604.
 
+## Data Cleaning methodology: 
+
+Here is the code used for the cleaning process. It mostly just relies on simple pattern recognition, and column selection.
+
+```{r}
+#|eval : false
 
 
-##
+```
