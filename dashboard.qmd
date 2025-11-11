@@ -382,18 +382,10 @@ Here are where I found the datasets used for this analysis :
 -   2024 Election Geographic Data (<https://statewidedatabase.org/d20/g24_geo_conv.html>): source of shapefiles for precinct maps from 2024 General Election.
 -   Proposed Congressional Map (<https://aelc.assembly.ca.gov/proposed-congressional-map>): source of shapefiles for district map proposed in AB 604.
 
-## Data Cleaning methodology
 
-Here is the code used for the cleaning process. It mostly just relies on simple pattern recognition, and column selection:
+**Gerrymandering metrics documentation:**
 
-<button onclick="window.open('https://sacha-bondeville.quarto.pub/data-cleaning-gerrymandering/', '_blank')" 
-        style="padding:10px 20px; background-color:#0078d7; color:white; border:none; border-radius:6px; cursor:pointer;">
-  📄 Open PDF Report
-</button>
-
-## Gerrymandering metrics documentation: 
-
-**Mean-Median Score:**
+*Mean-Median Score:*
 Here is the code used to compute this metric : 
 
 ```r
@@ -412,7 +404,7 @@ Suppose we observe an election where the vote share for Republicans in each of �
 The mean-median score is:
 𝑀=mean(𝑣𝑖)−median(𝑣𝑖)
 
-**Efficiency score:**
+*Efficiency score:*
 Here is the code used to compute this metric : 
 
 ```r
@@ -431,4 +423,11 @@ $EG = \frac{W_B - W_A}{T}$
 
 Where 𝑊𝐵 is the number of wasted votes by Party B, 𝑊𝐴 is the number of wasted votes by Party A, and 𝑇 is the total votes cast.
 
+## Data Cleaning methodology
 
+Here is the code used for the cleaning process. It mostly just relies on simple pattern recognition, and column selection:
+
+<button onclick="window.open('https://sacha-bondeville.quarto.pub/data-cleaning-gerrymandering/', '_blank')" 
+        style="padding:10px 20px; background-color:#0078d7; color:white; border:none; border-radius:6px; cursor:pointer;">
+  📄 Open PDF Report
+</button>

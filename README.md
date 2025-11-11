@@ -3,3 +3,7 @@
 *Sacha Bondeville*
 
 # GERRYMANDERING ANALYSIS ON PROP50
+
+Here is the link to my quarto dashboard ! 
+
+<https://sacha-bondeville.quarto.pub/prop50-impact-analysis/>
