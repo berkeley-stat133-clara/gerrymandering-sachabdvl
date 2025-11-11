@@ -15,7 +15,7 @@ library(stringr)
 
 From the website : - CNG stangs for "Congressionnal" - There can be several candidates within each district. This is what we care about. - CDDIST is the congressional district number - SVPREC is the precinct identifier
 
-# Simplifying the dataset
+## Simplifying the dataset
 
 We can first select the columns we care about. 
 
@@ -24,8 +24,6 @@ svprecinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/g24_sov
 
 sv_precinct <- svprecinct |>
     select(COUNTY, SVPREC, CDDIST, TOTVOTE, CNGDEM01, CNGDEM02, CNGREP01, CNGREP02)
-
-
 
 ```
 
@@ -58,23 +56,94 @@ sv_precinct <- sv_precinct  |>
 
 ## Getting rid of irrelevant columns. 
 
-Notice there are some precinct with no competition (only voting for democratic candidates or republican candidates). For the sake of our analysis, we choose to disregard them. To simplify our analysis, we want a total vote column that only consider democrat and republican votes. 
+Notice there are some precinct with no competition (only voting for democratic candidates or republican candidates). For the sake of our analysis, we will then choose to disregard them for some metrics. To simplify our analysis, we will also want a total vote column that only consider democrat and republican votes. 
 
 ```{r}
 sv_precinct <- sv_precinct |>
-    filter(!(REP01 == 0 & REP02 == 0),
-    !(DEM01 == 0 & DEM02 == 0))
-
-sv_precinct <- sv_precinct |>
-    select(-c(DEM02, REP02))
-
-sv_precinct <- sv_precinct |>
-    mutate(TOTVOTE = REP01 + DEM01)
+    mutate(TOTVOTE = REP01+DEM01+REP02+DEM02)
 ```
 
+## District name analysis
 
-# Saving the cleaned dataset
+```{r}
+levels(factor(sv_precinct$DISTRICT))
+```
+
+The district 0 does not exist ! We choose to disregard it. It combines some summary statistics we do not want. 
+
+```{r}
+sv_precinct <- sv_precinct|>
+    filter(DISTRICT != 0)
+```
+
+## Saving the cleaned dataset
 
 ```{r}
 write.csv(sv_precinct, "Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv", row.names = FALSE)
 ```
+
+# Cleaning the SRPrecinct file 
+
+*Following the exact same methodology than above* 
+
+```{r}
+sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/state_g24_sov_data_by_g24_srprec.csv")
+
+sr_precinct <- sr_precinct |>
+    select(COUNTY, SRPREC_KEY, CDDIST, TOTVOTE, CNGDEM01, CNGDEM02, CNGREP01, CNGREP02)|>
+    rename(DEM01= CNGDEM01, 
+    DEM02 = CNGDEM02,
+    REP01 = CNGREP01,
+    REP02 = CNGREP02, 
+    DISTRICT = CDDIST
+          )|>
+    mutate(DEM01 = as.double(str_extract_all(DEM01, "\\d+")),
+           DEM02 = as.double(str_extract_all(DEM02, "\\d+")),
+           REP01 = as.double(str_extract_all(REP01, "\\d+")),
+           REP02 = as.double(str_extract_all(REP02, "\\d+")))|>
+    mutate(TOTVOTE = REP01+DEM01+REP02+DEM02) |>
+    filter(DISTRICT != 0)
+
+```
+
+# Cleaning the redistribution district files. 
+
+For that we use the *block* unit, and the *conversion* files from the California State Assembly. 
+
+```{r}
+district_conv <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/ab604.csv", header = FALSE)
+
+blk <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/state_g24_voters_by_block20.csv")
+
+district_conv <- district_conv |>
+    mutate(BLOCKID = as.character(V1))|>
+    rename(NEWDISTRICT = V2)|>
+    select(-1)
+
+blk <- blk |>
+    mutate(BLOCK_KEY = as.character(BLOCK20))
+
+blk_converter <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/state_g24_sr_blk_map.csv")
+
+blk_converter <- blk_converter |>
+    mutate(BLOCK_KEY = as.character(BLOCK_KEY))
+
+```
+
+## Joining sequence. 
+We first join the new district with the block data. Then we join that with the sr_precinct data ! 
+```{r}
+
+join1 <- left_join(blk, district_conv, by = join_by(BLOCK_KEY == BLOCKID))
+
+join2 <- left_join(join1, blk_converter, by = join_by(BLOCK_KEY == BLOCK_KEY))
+
+sr_precinct <- left_join(sr_precinct, join2, by = join_by(SRPREC_KEY == SRPREC_KEY))
+```
+
+## Saving it back 
+
+```{r}
+write.csv(sr_precinct, "/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
+```
+

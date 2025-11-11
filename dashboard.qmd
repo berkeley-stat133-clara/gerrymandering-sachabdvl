@@ -1,5 +1,386 @@
 ---
-title: Dashboard
-format: dashboard
+title: Prop50 impact analysis
+format: 
+    dashboard: 
+        theme : zephyr
+author : Sacha Bondeville
 ---
 
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyverse)
+library(boot)
+library(sf)
+library(leaflet)
+library(plotly)
+library(shiny)
+library(downloadthis)
+
+sv_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
+
+district_level <-  sv_precinct |>
+    group_by(DISTRICT)|>
+    summarize(DEM01 = sum(DEM01, na.rm= T),
+    DEM02 = sum(DEM02, na.rm = T),
+    REP02 = sum(REP02, na.rm = TRUE),
+    REP01 = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE, na.rm =T))|>
+        mutate(WINNER= ifelse(DEM01 > REP01, "DEM", "REP"),
+        SCALE = (DEM01+DEM02)/TOTVOTE)
+    
+# Now we can just compute our score : 
+
+district_vi <- district_level |>
+    filter(DEM02 == 0 & REP02 == 0)|>
+    mutate(v_i = DEM01 / (TOTVOTE))
+
+mean_median <- district_vi |> 
+    summarize(democratscore = mean(v_i)-median(v_i))
+
+
+n_wasted <- function(by, against) {
+    w_threshold <- floor((by + against) / 2) + 1
+    n_wasted <- ifelse(by > against, by - w_threshold, by)
+    n_wasted
+}
+ES <- district_vi |>
+mutate(wasted_D = n_wasted(DEM01, REP01),
+      wasted_R = n_wasted(REP01, DEM01))|>
+summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
+
+
+districts <- st_read("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/Districts/US_Congressional_Districts.shp", quiet = TRUE)
+
+districts <- districts |>
+    mutate(DISTRICT = as.double(GEOID))
+
+districts <- st_sf(left_join(districts, district_level, by = join_by(DISTRICT == DISTRICT)))
+
+
+static_map <- districts |>
+    ggplot(aes(fill = WINNER))+geom_sf()+
+    scale_fill_manual(
+    values = c(
+      "DEM" = "#6090F7",
+      "REP" = "#FA6E52"))+ 
+    theme_minimal(base_family = "Arial")+
+    scale_x_continuous(breaks = c())+
+    scale_y_continuous(breaks = c())+
+    labs(title = "2024 Gen. Election actual results", 
+    x = "", 
+    y = "", 
+    fill = "",
+    caption = "Source: Official State data")
+
+districts <- st_transform(districts, crs = 4326)
+
+#pal_continuous <- colorNumeric(
+# palette = colorRampPalette(c("#ff0000ff", "#000dffff"))(100),
+#  domain = districts$SCALE
+#)
+
+pal_discrete <- colorFactor(
+palette = c(
+  "DEM" = "#6090F7",
+  "REP" = "#FA6E52" 
+),
+domain = districts$WINNER
+)
+
+interact_map <- leaflet(districts) |>
+addProviderTiles("CartoDB.Positron")|>
+addPolygons( 
+fillColor = ~pal_discrete(WINNER),
+color = "black",
+weight = 1,
+fillOpacity = 0.8,
+label = ~paste0("DEM Votes:", DEM01, " | REP votes : ", REP01))|>
+addLegend(
+pal = pal_discrete,
+values = ~WINNER,
+title = "Result",
+position = "topright"
+)
+
+ab604 <- st_read("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/AB604/AB604.shp", quiet= T)
+
+ab604 <- ab604 |>
+    mutate(DISTRICT = as.double(DISTRICT))
+
+sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
+
+block_prop <- sr_precinct |>
+    mutate(PROP_DEM_BLOCK = DEM/sum(DEM),
+    PROP_REP_BLOCK = REP/(sum(REP)),
+    .by = SRPREC_KEY)|>
+    mutate(BLOCK_WEIGHTED_DEM = (DEM01+DEM02)*PROP_DEM_BLOCK,
+    BLOCK_WEIGHTED_REP = (REP01+REP02)*PROP_REP_BLOCK)
+hypo_districts <- block_prop |>
+    group_by(NEWDISTRICT)|>
+    summarize(DEM_est = sum(BLOCK_WEIGHTED_DEM, na.rm = T),
+    REP_est = sum(BLOCK_WEIGHTED_REP, na.rm = T))|>
+    mutate(WINNER= ifelse(DEM_est > REP_est, "DEM", "REP"))|>
+    drop_na(NEWDISTRICT)
+hypo_district_vi <- hypo_districts |>
+    mutate(v_i = DEM_est / (REP_est + DEM_est))
+
+hypo_mean_median <- hypo_district_vi |> 
+    summarize(democratscore = mean(v_i)-median(v_i))
+
+hypo_ES <- hypo_district_vi |>
+mutate(wasted_D = n_wasted(DEM_est, REP_est),
+      wasted_R = n_wasted(REP_est, DEM_est))|>
+summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(DEM_est + REP_est)))
+
+hypo_districts <- st_sf(left_join(hypo_districts, ab604, by = join_by(NEWDISTRICT == DISTRICT)))
+
+hypo_districts <- st_transform(hypo_districts, crs = 4326)
+
+
+static_map_hypo <- hypo_districts |>
+    ggplot(aes(fill = WINNER))+geom_sf()+
+    scale_fill_manual(
+    values = c(
+      "DEM" = "#6090F7",
+      "REP" = "#FA6E52"))+ 
+    theme_minimal(base_family = "Arial")+
+    scale_x_continuous(breaks = c())+
+    scale_y_continuous(breaks = c())+
+    labs(title = "2024 Gen. Election hypothetical results", 
+    x = "", 
+    y = "", 
+    fill = "",
+    caption = "Source: Official State data")
+
+hypo_districts <- st_transform(hypo_districts, crs = 4326)
+
+#pal_continuous <- colorNumeric(
+# palette = colorRampPalette(c("#ff0000ff", "#000dffff"))(100),
+#  domain = districts$SCALE
+#)
+
+pal_discrete_2 <- colorFactor(
+palette = c(
+  "DEM" = "#6090F7",
+  "REP" = "#FA6E52" 
+),
+domain = hypo_districts$WINNER
+)
+
+interact_map_hypo <- leaflet(hypo_districts) |>
+addProviderTiles("CartoDB.Positron")|>
+addPolygons( 
+fillColor = ~pal_discrete(WINNER),
+color = "black",
+weight = 1,
+fillOpacity = 0.8,
+label = ~paste0("DEM Votes:", floor(DEM_est), " | REP votes : ", floor(REP_est)))|>
+addLegend(
+pal = pal_discrete_2,
+values = ~WINNER,
+title = "Results",
+position = "topright"
+)
+
+n_seats_hypo <- sum(hypo_districts$WINNER == "DEM")
+n_seats <- sum(district_level$WINNER == "DEM")
+
+
+```
+
+# Metric results
+
+## Actual 2024 Metric {height = 20%}
+
+```{r}
+#| component: valuebox
+#| title: "Efficiency Score for California 2024 General Election :"
+list(
+    color = "success",
+    value = ES[[1]],4
+    )
+```
+
+```{r}
+#| component: valuebox
+#| title: Actual number of Democrat seats
+list(
+  color = "success",
+  value = n_seats
+)
+```
+
+```{r}
+#| component: valuebox
+#| title: "Hypotetical Efficiency Score, given new district mapping :"
+
+list(
+    color = "warning",
+    value = hypo_ES[[1]],4
+)
+
+```
+
+```{r}
+#| component: valuebox
+#| title: Hypothetical number of Democrat seats
+list(
+  color = "warning",
+  value = n_seats_hypo
+)
+
+```
+
+## Maps {height = 75%}
+
+```{r}
+#| title: "Actual 2024 election results in California"
+interact_map
+```
+
+```{r}
+#| title: "Hypothetical 2024 election results given new districts"
+interact_map_hypo
+```
+
+##
+
+```{r}
+#| title : "Download the map"
+
+ggsave("static_map.png", plot = static_map, width = 6, height = 4, dpi = 300)
+
+ggsave("hypo_static_map.png", plot = static_map_hypo, width = 6, height = 4, dpi = 300)
+
+download_file("static_map.png", button_label = "⬇️ Download plot", button_type = "success")
+```
+
+```{r}
+download_file("hypo_static_map.png", button_label = "⬇️ Download plot", button_type = "success")
+```
+
+
+# Election Insights
+
+
+## Introduction {height = 10%} 
+
+Throughout the course of my analysis, I found some an interesting patterns at district and county levels. 
+
+## Association {height = 80%}
+
+```{r}
+#| echo: false
+
+insight <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
+
+county_level <-  insight |>
+    filter(!(DEM02 > 0),
+    !(REP02 > 0))|>
+    group_by(COUNTY, DISTRICT)|>
+    summarize(DEM = sum(DEM01, na.rm= T), 
+    REP = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE, na.rm = T))|>
+        mutate(WINNER= ifelse(DEM > REP, "DEM", "REP"))
+
+m1 <- lm((REP)~(DEM), data = county_level)
+
+g1 <-  county_level |>
+    ggplot(aes(x = DEM, y = REP))+
+    geom_smooth(method = "lm", color = "lightblue", se = F)+
+    geom_point(aes(text = paste(
+    "COUNTY:", COUNTY,
+    "<br>Democrat votes:", DEM,
+    "<br>Republican votes:", REP,
+    "<br>Total votes:", TOTVOTE), color = WINNER))+
+    scale_color_manual(
+    values = c(
+      "DEM" = "#6090F7",
+      "REP" = "#FA6E52"))+ 
+    theme_minimal(base_family = "Arial")+
+    labs(title = "Association: dem and rep vote (county lvl)", 
+    x = "# of Democrat votes", 
+    y = "# of Republican votes", 
+    caption = paste("the slope coefficient of our linear model is of :",round(m1[[1]][2], 4)))
+
+district_level <-  sv_precinct |>
+    filter(!(DEM02 > 0),
+    !(REP02 > 0))|>
+    group_by(DISTRICT)|>
+    summarize(DEM = sum(DEM01, na.rm= T), 
+    REP = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE, na.rm = T))|>
+        mutate(WINNER= ifelse(DEM > REP, "DEM", "REP"))
+
+m2 <- lm((REP)~(DEM), data = district_level)
+
+
+
+g2 <-  district_level |>
+    ggplot(aes(x = DEM, y = REP))+
+    geom_smooth(method = "lm", color = "lightblue", se = F)+
+    geom_point(aes(text = paste(
+    "DISTRICT:", DISTRICT,
+    "<br>Democrat votes:", DEM,
+    "<br>Republican votes:", REP,
+    "<br>Total votes:", TOTVOTE), color = WINNER))+
+    scale_color_manual(
+    values = c(
+      "DEM" = "#6090F7",
+      "REP" = "#FA6E52"))+ 
+    theme_minimal(base_family = "Arial")+
+    labs(title = "Association: dem and rep vote (district lvl)", 
+    x = "# of Democrat votes", 
+    y = "# of Republican votes", 
+    caption = paste("the slope coefficient of our linear model is of :",round(m2[[1]][2], 4)))
+
+```
+
+```{r}
+ggplotly(g1)
+```
+
+```{r}
+ggplotly(g2)
+```
+
+## Explanation {height = 10%}
+
+Note the county with the *the highest number of republican votes given its democratic vote* (aka the highest residual) is the **Orange County**. Living in California, a lot of American indeed mentioned that the Orange county was known to be quite republican for LA. I find that is a founded statement indeed! 
+
+## Some other metrics
+
+```{r}
+#| component: valuebox
+#| title: "Actual Mean-Median Score"
+list(
+    color = "success",
+    value = mean_median[[1]]
+    )
+```
+
+```{r}
+#| component: valuebox
+#| title: "New hypothetical Mean-Median Score"
+list(
+    color = "warning",
+    value = hypo_mean_median[[1]]
+    )
+```
+
+# Methodology
+
+## Sources
+
+Here are where I found the datasets used for this analysis : 
+
+-   California Statewide Special Election (<https://www.sos.ca.gov/elections/upcoming-elections/statewide-special-nov-4-2025>): official website for the election from the CA Secretary of State.
+-   Statewide Database Precinct Data (<https://statewidedatabase.org/d20/g24.html>): source of precinct-level data from the 2024 General Election.
+-   2024 Election Geographic Data (<https://statewidedatabase.org/d20/g24_geo_conv.html>): source of shapefiles for precinct maps from 2024 General Election.
+-   Proposed Congressional Map (<https://aelc.assembly.ca.gov/proposed-congressional-map>): source of shapefiles for district map proposed in AB 604.
+
+
+
+##

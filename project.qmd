@@ -73,8 +73,6 @@ For the 2024 general election, calculate the mean-median score and efficiency ga
 
 ### Part 5: Determining 2025 Districts of 2024 Precincts
 
-Coming soon! See course website.
-
 \
 
 ### Part 6: Calculating Gerrymanding Again

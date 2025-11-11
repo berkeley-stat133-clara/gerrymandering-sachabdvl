@@ -12,26 +12,28 @@ sv_precinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/cleane
 
 ```
 
-
 ### Question 1
 
-*What is the total distribution of vote counts at **the county level** ?*
+*What is the total distribution of vote counts at **the district level** ?*
 
 
 ### Answer 1
 
 ```{r}
 
-county_level <-  sv_precinct |>
-    group_by(COUNTY)|>
-    summarize(DEM01 = sum(DEM01, na.rm= T), 
-    REP01 = sum(REP01, na.rm = T),
-    TOTVOTE = sum(TOTVOTE))|>
-        mutate(WINNER= ifelse(DEM01 > REP01, "DEM", "REP"))
 
-county_level |>
+district_level <-  sv_precinct |>
+    filter(!(DEM02 > 0),
+    !(REP02 > 0))|>
+    group_by(DISTRICT)|>
+    summarize(DEM = sum(DEM01, na.rm= T), 
+    REP = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE, na.rm = T))|>
+        mutate(WINNER= ifelse(DEM > REP, "DEM", "REP"))
+
+district_level |>
     ggplot(aes(x = TOTVOTE))+geom_histogram(fill = "goldenrod")+ 
-    labs(title = "Distribution of votes", 
+    labs(title = "Distribution of votes (district lvl)", 
     x = "#Total votes", 
     y  = "Count")+
     theme_minimal(base_family = "Arial")
@@ -40,30 +42,105 @@ county_level |>
 
 
 ### Question 2 : 
-What is the association between number of democrat vote and number of republican vote at the county level ? 
+What is the association between number of democrat vote and number of republican vote at the district level ? 
 
 ### Answer 2: 
 
 ```{r}
+#| warning: false
+m2 <- lm((REP)~(DEM), data = district_level)
 
-
-
-m1 <- lm(REP01~DEM01, data = county_level)
-
-g1 <-  county_level |>
-    ggplot(aes(x = DEM01, y = REP01))+
+g2 <-  district_level |>
+    ggplot(aes(x = DEM, y = REP))+
     geom_smooth(method = "lm", color = "lightblue", se = F)+
     geom_point(aes(text = paste(
-    "COUNTY:", COUNTY,
-    "<br>Democrat votes:", DEM01,
-    "<br>Republican votes:", REP01,
+    "DISTRICT:", DISTRICT,
+    "<br>Democrat votes:", DEM,
+    "<br>Republican votes:", REP,
     "<br>Total votes:", TOTVOTE), color = WINNER))+
     scale_color_manual(
     values = c(
       "DEM" = "#6090F7",
       "REP" = "#FA6E52"))+ 
     theme_minimal(base_family = "Arial")+
-    labs(title = "Association: democrat and republican vote", 
+    labs(title = "Association: dem and rep vote (district lvl)", 
+    x = "# of Democrat votes", 
+    y = "# of Republican votes", 
+    caption = paste("the slope coefficient of our linear model is of :",round(m2[[1]][2], 4)))
+
+ggplotly(g2)
+```
+
+### Question 3: 
+
+*What is the district with the highest number of republican votes given their number of democrat votes ?* 
+
+### Answer 3: 
+
+```{r}
+district_level |>
+    ungroup()|>
+    mutate(residual = resid(m2))|>
+    arrange(desc(residual))|>
+    select(DISTRICT)|>
+    slice(1)
+```
+
+The Orange County has the highest number of republican votes given democrat votes, which is not that surprising given the disparity of its social groups. 
+
+
+### Question 4
+
+*What is the total distribution of vote counts at **the county level** ?*
+
+
+### Answer 4
+
+```{r}
+
+
+county_level <-  sv_precinct |>
+    filter(!(DEM02 > 0),
+    !(REP02 > 0))|>
+    group_by(COUNTY, DISTRICT)|>
+    summarize(DEM = sum(DEM01, na.rm= T), 
+    REP = sum(REP01, na.rm = T),
+    TOTVOTE = sum(TOTVOTE, na.rm = T))|>
+        mutate(WINNER= ifelse(DEM > REP, "DEM", "REP"))
+
+county_level |>
+    ggplot(aes(x = TOTVOTE))+geom_histogram(fill = "goldenrod")+ 
+    labs(title = "Distribution of votes (county lvl)", 
+    x = "#Total votes", 
+    y  = "Count")+
+    theme_minimal(base_family = "Arial")
+
+```
+
+
+### Question 5 : 
+What is the association between number of democrat vote and number of republican vote at the county level ? 
+
+### Answer 5: 
+
+```{r}
+#| warning: false
+m1 <- lm((REP)~(DEM), data = county_level)
+
+g1 <-  county_level |>
+    ggplot(aes(x = DEM, y = REP))+
+    geom_smooth(method = "lm", color = "lightblue", se = F)+
+    geom_point(aes(text = paste(
+    "COUNTY:", COUNTY,
+    "<br>Democrat votes:", DEM,
+    "<br>Republican votes:", REP,
+    "<br>Total votes:", TOTVOTE), color = WINNER))+
+    scale_color_manual(
+    values = c(
+      "DEM" = "#6090F7",
+      "REP" = "#FA6E52"))+ 
+    theme_minimal(base_family = "Arial")+
+    labs(title = "Association: dem and rep vote (county lvl)", 
     x = "# of Democrat votes", 
     y = "# of Republican votes", 
     caption = paste("the slope coefficient of our linear model is of :",round(m1[[1]][2], 4)))
@@ -71,14 +148,15 @@ g1 <-  county_level |>
 ggplotly(g1)
 ```
 
-### Question 3: 
+### Question 6: 
 
 *What is the county with the highest number of republican votes given their number of democrat votes ?* 
 
-### Answer 3: 
+### Answer 6: 
 
 ```{r}
 county_level |>
+    ungroup()|>
     mutate(residual = resid(m1))|>
     arrange(desc(residual))|>
     select(COUNTY)|>
