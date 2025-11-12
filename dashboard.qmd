@@ -118,6 +118,7 @@ block_prop <- sr_precinct |>
     .by = SRPREC_KEY)|>
     mutate(BLOCK_WEIGHTED_DEM = (DEM01+DEM02)*PROP_DEM_BLOCK,
     BLOCK_WEIGHTED_REP = (REP01+REP02)*PROP_REP_BLOCK)
+
 hypo_districts <- block_prop |>
     group_by(NEWDISTRICT)|>
     summarize(DEM_est = sum(BLOCK_WEIGHTED_DEM, na.rm = T),
@@ -197,10 +198,10 @@ n_seats <- sum(district_level$WINNER == "DEM")
 
 ```{r}
 #| component: valuebox
-#| title: "Efficiency Score for California 2024 General Election :"
+#| title: "Actual Mean-Median Score"
 list(
     color = "success",
-    value = ES[[1]],4
+    value = mean_median[[1]]
     )
 ```
 
@@ -215,13 +216,11 @@ list(
 
 ```{r}
 #| component: valuebox
-#| title: "Hypotetical Efficiency Score, given new district mapping :"
-
+#| title: "New hypothetical Mean-Median Score"
 list(
     color = "warning",
-    value = hypo_ES[[1]],4
-)
-
+    value = hypo_mean_median[[1]]
+    )
 ```
 
 ```{r}
@@ -355,20 +354,22 @@ Note the county with the *the highest number of republican votes given its democ
 
 ```{r}
 #| component: valuebox
-#| title: "Actual Mean-Median Score"
+#| title: "Efficiency Score for California 2024 General Election :"
 list(
     color = "success",
-    value = mean_median[[1]]
+    value = ES[[1]],4
     )
 ```
 
 ```{r}
 #| component: valuebox
-#| title: "New hypothetical Mean-Median Score"
+#| title: "Hypotetical Efficiency Score, given new district mapping :"
+
 list(
     color = "warning",
-    value = hypo_mean_median[[1]]
-    )
+    value = hypo_ES[[1]],4
+)
+
 ```
 
 # Methodology

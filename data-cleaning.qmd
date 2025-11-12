@@ -134,11 +134,11 @@ blk_converter <- blk_converter |>
 We first join the new district with the block data. Then we join that with the sr_precinct data ! 
 ```{r}
 
-join1 <- left_join(blk, district_conv, by = join_by(BLOCK_KEY == BLOCKID))
+join1 <- full_join(blk, district_conv, by = join_by(BLOCK_KEY == BLOCKID))
 
-join2 <- left_join(join1, blk_converter, by = join_by(BLOCK_KEY == BLOCK_KEY))
+join2 <- full_join(join1, blk_converter, by = join_by(BLOCK_KEY == BLOCK_KEY))
 
-sr_precinct <- left_join(sr_precinct, join2, by = join_by(SRPREC_KEY == SRPREC_KEY))
+sr_precinct <- full_join(sr_precinct, join2, by = join_by(SRPREC_KEY == SRPREC_KEY))
 ```
 
 ## Saving it back 
