@@ -148,8 +148,8 @@ sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Proje
 We use the registration vote to estimate the amount of DEM votes and REP votes within each block. This estimation will then allow us to study the impact of PROP50 redistribution ! 
 ```{r}
 block_prop <- sr_precinct |>
-    mutate(PROP_DEM_BLOCK = DEM/sum(DEM),
-    PROP_REP_BLOCK = REP/(sum(REP)),
+    mutate(PROP_DEM_BLOCK = (DEM/sum(DEM))*(PCTSRPREC/100),
+    PROP_REP_BLOCK = (REP/(sum(REP)))*(PCTSRPREC/100),
     .by = SRPREC_KEY)|>
     mutate(BLOCK_WEIGHTED_DEM = (DEM01+DEM02)*PROP_DEM_BLOCK,
     BLOCK_WEIGHTED_REP = (REP01+REP02)*PROP_REP_BLOCK)
@@ -181,6 +181,8 @@ hypo_mean_median <- hypo_district_vi |>
 hypo_mean_median
 ```
 
+The mean-median score increased slightly with Prop50
+
 ### Side quest : *Is the mean median score statistically significant ?*
 
 ```{r}
@@ -202,6 +204,8 @@ summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(DEM_est + REP_est)))
 
 hypo_ES
 ```
+
+The efficiency score nearly did not change at all ! 
 
 ## Hypothetical map : 
 
