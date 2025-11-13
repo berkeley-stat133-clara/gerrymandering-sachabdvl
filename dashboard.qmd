@@ -269,21 +269,21 @@ download_file("hypo_static_map.png", button_label = "⬇️ Download plot", butt
 
 ## Association {width = 80%} 
 
-Throughout the course of my analysis, I found some an interesting patterns at district and county levels. 
+Throughout the course of my analysis, I found some interesting pattern at district and county levels. 
 
 ```{r}
 #| echo: false
 
-insight <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
-
-county_level <-  insight |>
+county_level <-  sr_precinct |>
     filter(!(DEM02 > 0),
     !(REP02 > 0))|>
-    group_by(COUNTY, DISTRICT)|>
+    group_by(COUNTY)|>
     summarize(DEM = sum(DEM01, na.rm= T), 
     REP = sum(REP01, na.rm = T),
     TOTVOTE = sum(TOTVOTE, na.rm = T))|>
         mutate(WINNER= ifelse(DEM > REP, "DEM", "REP"))
+
+m1 <- lm((REP)~(DEM), data = county_level)
 
 m1 <- lm((REP)~(DEM), data = county_level)
 
@@ -299,8 +299,10 @@ g1 <-  county_level |>
     values = c(
       "DEM" = "#6090F7",
       "REP" = "#FA6E52"))+ 
+    scale_y_log10()+
+    scale_x_log10()+
     theme_minimal(base_family = "Arial")+
-    labs(title = "Association: dem and rep vote (county lvl)", 
+    labs(title = "Association: dem and rep vote (county lvl - log scale)", 
     x = "# of Democrat votes", 
     y = "# of Republican votes", 
     caption = paste("the slope coefficient of our linear model is of :",round(m1[[1]][2], 4)))
@@ -316,8 +318,6 @@ district_level <-  sr_precinct |>
 
 m2 <- lm((REP)~(DEM), data = district_level)
 
-
-
 g2 <-  district_level |>
     ggplot(aes(x = DEM, y = REP))+
     geom_smooth(method = "lm", color = "lightblue", se = F)+
@@ -331,7 +331,7 @@ g2 <-  district_level |>
       "DEM" = "#6090F7",
       "REP" = "#FA6E52"))+ 
     theme_minimal(base_family = "Arial")+
-    labs(title = "Association: dem and rep vote (district lvl)", 
+    labs(title = "Association: dem and rep vote (district lvl - linear scale)", 
     x = "# of Democrat votes", 
     y = "# of Republican votes", 
     caption = paste("the slope coefficient of our linear model is of :",round(m2[[1]][2], 4)))
@@ -348,7 +348,7 @@ ggplotly(g2)
 
 ## Explanation {width = 20%}
 
-Note the county with the *the highest number of republican votes given its democratic vote* (aka the highest residual) is the **Orange County** (Note This measure excludes counties with no democratic competition). Living in California, a lot of American indeed mentioned that the Orange county was known to be quite republican for LA. I find that is a founded statement indeed! 
+Note the county with the *the highest number of republican votes given its democratic vote* (aka the highest residual) is the **Orange County (30)** (Note This measure excludes counties with no democratic competition). Living in California, a lot of American indeed mentioned that the Orange county was known to be very republican for LA. I find that is a founded statement indeed! 
 ```{r}
 #| component: valuebox
 #| title: "Other metric: Actual Mean-Median Score"

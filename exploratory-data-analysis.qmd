@@ -66,7 +66,7 @@ g2 <-  district_level |>
       "DEM" = "#6090F7",
       "REP" = "#FA6E52"))+ 
     theme_minimal(base_family = "Arial")+
-    labs(title = "Association: dem and rep vote (district lvl)", 
+    labs(title = "Association: dem and rep vote (district lvl - linear scale)", 
     x = "# of Democrat votes", 
     y = "# of Republican votes", 
     caption = paste("the slope coefficient of our linear model is of :",round(m2[[1]][2], 4)))
@@ -145,7 +145,7 @@ g1 <-  county_level |>
     scale_y_log10()+
     scale_x_log10()+
     theme_minimal(base_family = "Arial")+
-    labs(title = "Association: dem and rep vote (county lvl)", 
+    labs(title = "Association: dem and rep vote (county lvl - log scale)", 
     x = "# of Democrat votes", 
     y = "# of Republican votes", 
     caption = paste("the slope coefficient of our linear model is of :",round(m1[[1]][2], 4)))
