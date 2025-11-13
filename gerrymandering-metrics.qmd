@@ -45,10 +45,10 @@ mean_median <- district_vi |>
 mean_median
 ```
 
-The mean-median score is of -0.00125. But we don't really know what to compare it to! It seems there is a very small negative score in defavor of democrats. 
+The mean-median score is of -0.00549. But we don't really know what to compare it to! It seems there is a very small negative score in defavor of democrats. 
 
 #### Side quest : *Is the mean median score statistically significant ?*
-
+We do a simple bootstrap approach. A deeper analysis would imply a t.test statistic.
 ```{r}
 # We define a function that can compute that systematically on a bootstrap test: 
 
@@ -62,7 +62,7 @@ boot_res <- boot(district_vi, democratscore_fn, R = 2000, )
 boot.ci(boot_res, type = "perc")
 ```
 
-The CI interval reveals there is no statistical significance on this measure ! 
+The CI interval reveals there is no statistical significance on this measure (it contains 0)! 
 
 ### Efficiency Score
 
@@ -75,16 +75,17 @@ n_wasted <- function(by, against) {
 ES <- district_level |>
 mutate(wasted_D = n_wasted(DEM01, REP01),
       wasted_R = n_wasted(REP01, DEM01))|>
-summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
+summarize(EG = (sum(wasted_R)-sum(wasted_D))/(sum(TOTVOTE)))
 
 ES
 
 ```
 
-
+The effiency score is of 0.08 : A slight advantage in favor of the democrats.
 ## Map ! 
 
 ```{r}
+#| echo: false
 districts <- st_read("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/Districts/US_Congressional_Districts.shp")
 
 districts <- districts |>
@@ -95,7 +96,8 @@ districts <- st_sf(left_join(districts, district_level, by = join_by(DISTRICT ==
 ```
 
 ```{r}
-
+#| echo: false
+#| warning: false
 districts |>
     ggplot(aes(fill = WINNER))+geom_sf()+
     scale_fill_manual(
@@ -111,22 +113,6 @@ districts |>
     fill = "",
     caption = "Source: Official State data")
 
-districts <- st_transform(districts, crs = 4326)
-
-#pal_continuous <- colorNumeric(
-# palette = colorRampPalette(c("#ff0000ff", "#000dffff"))(100),
-#  domain = districts$SCALE
-#)
-
-pal_discrete <- colorFactor(
-palette = c(
-  "DEM" = "#6090F7",
-  "REP" = "#FA6E52" 
-),
-domain = districts$WINNER
-)
-
-
 
 ```
 
@@ -134,6 +120,8 @@ domain = districts$WINNER
 # 2024 Election Results and the proposed 2025 District Map
 
 ## Methodology : 
+
+Using data from registered voters in each blocks, we can forecast the new district democrat / republican distribution joining different public datasets.  This estimation will then allow us to study the impact of PROP50 redistribution !
 
 ```{r}
 #| echo: false
@@ -143,10 +131,8 @@ ab604 <- ab604 |>
     mutate(DISTRICT = as.double(DISTRICT))
 
 
-
 ```
 
-We use the registration vote to estimate the amount of DEM votes and REP votes within each block. This estimation will then allow us to study the impact of PROP50 redistribution ! 
 ```{r}
 block_prop <- sr_precinct |>
     mutate(PROP_DEM_BLOCK = (DEM/sum(DEM))*(PCTSRPREC/100),
@@ -182,7 +168,7 @@ hypo_mean_median <- hypo_district_vi |>
 hypo_mean_median
 ```
 
-The mean-median score increased slightly with Prop50
+The mean-median score increased slightly with Prop50, this time in favor of democrats. 
 
 ### Side quest : *Is the mean median score statistically significant ?*
 
@@ -201,12 +187,12 @@ The mean-median score increased in favor of the democrats, but the result is sti
 hypo_ES <- hypo_districts |>
 mutate(wasted_D = n_wasted(DEM_est, REP_est),
       wasted_R = n_wasted(REP_est, DEM_est))|>
-summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(DEM_est + REP_est)))
+summarize(EG = (sum(wasted_R)-sum(wasted_D))/(sum(DEM_est + REP_est)))
 
 hypo_ES
 ```
 
-The efficiency score nearly did not change at all ! 
+The efficiency gap significantly increased, from 8 to 20%. This metric seems to reveal the impact of prop50 in a more consistent way!
 
 ## Hypothetical map : 
 
@@ -251,6 +237,21 @@ domain = hypo_districts$WINNER
 
 ```{r}
 #| eval: false
+
+districts <- st_transform(districts, crs = 4326)
+
+#pal_continuous <- colorNumeric(
+# palette = colorRampPalette(c("#ff0000ff", "#000dffff"))(100),
+#  domain = districts$SCALE
+#)
+
+pal_discrete <- colorFactor(
+palette = c(
+  "DEM" = "#6090F7",
+  "REP" = "#FA6E52" 
+),
+domain = districts$WINNER
+)
 
 # Actual results: 
 leaflet(districts) |>
