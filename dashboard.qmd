@@ -51,7 +51,7 @@ n_wasted <- function(by, against) {
 ES <- district_level |>
 mutate(wasted_D = n_wasted(DEM01, REP01),
       wasted_R = n_wasted(REP01, DEM01))|>
-summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
+summarize(EG = (sum(wasted_R)-sum(wasted_D))/(sum(TOTVOTE)))
 
 
 districts <- st_read("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/Districts/US_Congressional_Districts.shp", quiet = TRUE)
@@ -136,7 +136,7 @@ hypo_mean_median <- hypo_district_vi |>
 hypo_ES <- hypo_districts |>
 mutate(wasted_D = n_wasted(DEM_est, REP_est),
       wasted_R = n_wasted(REP_est, DEM_est))|>
-summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(DEM_est + REP_est)))
+summarize(EG = (sum(wasted_R)-sum(wasted_D))/(sum(DEM_est + REP_est)))
 
 hypo_districts <- st_sf(left_join(hypo_districts, ab604, by = join_by(NEWDISTRICT == DISTRICT)))
 
@@ -213,12 +213,13 @@ interact_map_hypo
 
 ```{r}
 #| component: valuebox
-#| title: "Actual Mean-Median Score"
+#| title: "Efficiency Score for California 2024 General Election :"
 list(
     color = "success",
-    value = round(mean_median[[1]], 4)
+    value = paste0(round(ES[[1]]*100, 2), "%")
     )
 ```
+
 
 ```{r}
 #| component: valuebox
@@ -239,15 +240,17 @@ ggsave("hypo_static_map.png", plot = static_map_hypo, width = 6, height = 4, dpi
 download_file("static_map.png", button_label = "⬇️ Download plot", button_type = "success")
 ```
 
+
 ```{r}
 #| component: valuebox
-#| title: "New hypothetical Mean-Median Score"
+#| title: "Hypotetical Efficiency Score, given new district mapping :"
+
 list(
     color = "warning",
-    value = round(hypo_mean_median[[1]],4)
-    )
-```
+    value = paste0(round(hypo_ES[[1]]*100, 2), "%")
+)
 
+```
 ```{r}
 #| component: valuebox
 #| title: Hypothetical number of Democrat seats
@@ -346,25 +349,21 @@ ggplotly(g2)
 ## Explanation {width = 20%}
 
 Note the county with the *the highest number of republican votes given its democratic vote* (aka the highest residual) is the **Orange County** (Note This measure excludes counties with no democratic competition). Living in California, a lot of American indeed mentioned that the Orange county was known to be quite republican for LA. I find that is a founded statement indeed! 
-
 ```{r}
 #| component: valuebox
-#| title: "Efficiency Score for California 2024 General Election :"
+#| title: "Other metric: Actual Mean-Median Score"
 list(
     color = "success",
-    value = ES[[1]],4
+    value = round(mean_median[[1]], 4)
     )
 ```
-
 ```{r}
 #| component: valuebox
-#| title: "Hypotetical Efficiency Score, given new district mapping :"
-
+#| title: "Other metric: New hypothetical Mean-Median Score"
 list(
     color = "warning",
-    value = hypo_ES[[1]],4
-)
-
+    value = round(hypo_mean_median[[1]],4)
+    )
 ```
 
 # Methodology {orientation="columns" scrolling="true"}
@@ -406,7 +405,7 @@ Here is the code used to compute this metric :
 ES <- district_vi |>
 mutate(wasted_D = n_wasted(DEM01, REP01),
       wasted_R = n_wasted(REP01, DEM01))|>
-summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
+summarize(EG = (sum(wasted_R)-sum(wasted_D))/(sum(TOTVOTE)))
 
 ```
 It follows the following logic: 
