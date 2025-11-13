@@ -2,6 +2,7 @@
 title: Prop50 impact analysis
 format: 
     dashboard: 
+        orientation : columns
         theme : zephyr
         card-style: none
 author : Sacha Bondeville
@@ -19,23 +20,24 @@ library(plotly)
 library(shiny)
 library(downloadthis)
 
-sv_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
+sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
 
-district_level <-  sv_precinct |>
+district_level <-  sr_precinct |>
     group_by(DISTRICT)|>
     summarize(DEM01 = sum(DEM01, na.rm= T),
     DEM02 = sum(DEM02, na.rm = T),
     REP02 = sum(REP02, na.rm = TRUE),
     REP01 = sum(REP01, na.rm = T),
     TOTVOTE = sum(TOTVOTE, na.rm =T))|>
-        mutate(WINNER= ifelse(DEM01 > REP01, "DEM", "REP"),
+        mutate(WINNER= ifelse((DEM01+DEM02) > (REP01+REP02), "DEM", "REP"),
         SCALE = (DEM01+DEM02)/TOTVOTE)
     
 # Now we can just compute our score : 
 
 district_vi <- district_level |>
     filter(DEM02 == 0 & REP02 == 0)|>
-    mutate(v_i = DEM01 / (TOTVOTE))
+    mutate(v_i = DEM01 / (TOTVOTE))|>
+    drop_na(v_i)
 
 mean_median <- district_vi |> 
     summarize(democratscore = mean(v_i)-median(v_i))
@@ -46,7 +48,7 @@ n_wasted <- function(by, against) {
     n_wasted <- ifelse(by > against, by - w_threshold, by)
     n_wasted
 }
-ES <- district_vi |>
+ES <- district_level |>
 mutate(wasted_D = n_wasted(DEM01, REP01),
       wasted_R = n_wasted(REP01, DEM01))|>
 summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
@@ -110,12 +112,12 @@ ab604 <- st_read("/Users/sachabondeville/Documents/stat133/Projects/Project-5/ge
 ab604 <- ab604 |>
     mutate(DISTRICT = as.double(DISTRICT))
 
-sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
+
 
 block_prop <- sr_precinct |>
     mutate(PROP_DEM_BLOCK = (DEM/sum(DEM))*(PCTSRPREC/100),
     PROP_REP_BLOCK = (REP/(sum(REP)))*(PCTSRPREC/100),
-    .by = SRPREC_KEY)|>
+    .by = SRPREC)|>
     mutate(BLOCK_WEIGHTED_DEM = (DEM01+DEM02)*PROP_DEM_BLOCK,
     BLOCK_WEIGHTED_REP = (REP01+REP02)*PROP_REP_BLOCK)
 
@@ -131,7 +133,7 @@ hypo_district_vi <- hypo_districts |>
 hypo_mean_median <- hypo_district_vi |> 
     summarize(democratscore = mean(v_i)-median(v_i))
 
-hypo_ES <- hypo_district_vi |>
+hypo_ES <- hypo_districts |>
 mutate(wasted_D = n_wasted(DEM_est, REP_est),
       wasted_R = n_wasted(REP_est, DEM_est))|>
 summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(DEM_est + REP_est)))
@@ -192,16 +194,29 @@ n_seats <- sum(district_level$WINNER == "DEM")
 
 ```
 
-# Metric results
+# Metric results {orientation="columns" scrolling="true"}
 
-## Actual 2024 Metric {height = 20%}
+## Actual Map {width=60%}
+
+```{r}
+#| title: "Actual 2024 election results in California"
+interact_map
+```
+
+```{r}
+#| title: "Hypothetical 2024 election results given new districts"
+interact_map_hypo
+```
+
+
+## Actual 2024 Metric {width = 40%}
 
 ```{r}
 #| component: valuebox
 #| title: "Actual Mean-Median Score"
 list(
     color = "success",
-    value = mean_median[[1]]
+    value = round(mean_median[[1]], 4)
     )
 ```
 
@@ -215,11 +230,21 @@ list(
 ```
 
 ```{r}
+#| title : "Download the map"
+
+ggsave("static_map.png", plot = static_map, width = 6, height = 4, dpi = 300)
+
+ggsave("hypo_static_map.png", plot = static_map_hypo, width = 6, height = 4, dpi = 300)
+
+download_file("static_map.png", button_label = "⬇️ Download plot", button_type = "success")
+```
+
+```{r}
 #| component: valuebox
 #| title: "New hypothetical Mean-Median Score"
 list(
     color = "warning",
-    value = hypo_mean_median[[1]]
+    value = round(hypo_mean_median[[1]],4)
     )
 ```
 
@@ -233,43 +258,15 @@ list(
 
 ```
 
-## Maps {height = 75%}
-
-```{r}
-#| title: "Actual 2024 election results in California"
-interact_map
-```
-
-```{r}
-#| title: "Hypothetical 2024 election results given new districts"
-interact_map_hypo
-```
-
-##
-
-```{r}
-#| title : "Download the map"
-
-ggsave("static_map.png", plot = static_map, width = 6, height = 4, dpi = 300)
-
-ggsave("hypo_static_map.png", plot = static_map_hypo, width = 6, height = 4, dpi = 300)
-
-download_file("static_map.png", button_label = "⬇️ Download plot", button_type = "success")
-```
-
 ```{r}
 download_file("hypo_static_map.png", button_label = "⬇️ Download plot", button_type = "success")
 ```
 
-
 # Election Insights
 
-
-## Introduction {height = 10%} 
+## Association {width = 80%} 
 
 Throughout the course of my analysis, I found some an interesting patterns at district and county levels. 
-
-## Association {height = 80%}
 
 ```{r}
 #| echo: false
@@ -305,7 +302,7 @@ g1 <-  county_level |>
     y = "# of Republican votes", 
     caption = paste("the slope coefficient of our linear model is of :",round(m1[[1]][2], 4)))
 
-district_level <-  sv_precinct |>
+district_level <-  sr_precinct |>
     filter(!(DEM02 > 0),
     !(REP02 > 0))|>
     group_by(DISTRICT)|>
@@ -346,11 +343,9 @@ ggplotly(g1)
 ggplotly(g2)
 ```
 
-## Explanation {height = 10%}
+## Explanation {width = 20%}
 
-Note the county with the *the highest number of republican votes given its democratic vote* (aka the highest residual) is the **Orange County**. Living in California, a lot of American indeed mentioned that the Orange county was known to be quite republican for LA. I find that is a founded statement indeed! 
-
-## Some other metrics
+Note the county with the *the highest number of republican votes given its democratic vote* (aka the highest residual) is the **Orange County** (Note This measure excludes counties with no democratic competition). Living in California, a lot of American indeed mentioned that the Orange county was known to be quite republican for LA. I find that is a founded statement indeed! 
 
 ```{r}
 #| component: valuebox
@@ -372,9 +367,7 @@ list(
 
 ```
 
-# Methodology
-
-## Sources
+# Methodology {orientation="columns" scrolling="true"}
 
 Here are where I found the datasets used for this analysis : 
 
@@ -420,11 +413,11 @@ It follows the following logic:
 
 Suppose two parties, A and B. The efficiency gap (EG) favoring party A for a given pattern of votes, is defined as the difference in wasted votes divided by the total number of votes:
 
-$EG = \frac{W_B - W_A}{T}$
+$$EG = \frac{W_B - W_A}{T}$$
 
 Where 𝑊𝐵 is the number of wasted votes by Party B, 𝑊𝐴 is the number of wasted votes by Party A, and 𝑇 is the total votes cast.
 
-## Data Cleaning methodology
+____
 
 Here is the code used for the cleaning process. It mostly just relies on simple pattern recognition, and column selection:
 

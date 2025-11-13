@@ -13,6 +13,8 @@ library(stringr)
 
 # Cleaning the SVPrecinct data
 
+*The cleaning of SV Precinct is not used on the Prop50 analysis, but is a fundation for the cleaning of the SR precinct data set cleaned below.*
+
 From the website : - CNG stands for "Congressionnal" - There can be several candidates within each district. This is what we care about. - CDDIST is the congressional district number - SVPREC is the precinct identifier
 
 ## Simplifying the dataset

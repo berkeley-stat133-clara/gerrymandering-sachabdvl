@@ -11,8 +11,8 @@ library(boot)
 library(sf)
 library(leaflet)
 library(plotly)
-sv_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
 
+sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
 ```
 
 # 2024 Election Results and the 2024 District Map
@@ -22,7 +22,7 @@ sv_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Proje
 ### Mean-Median approach: 
 Remember we need to disregard districts in which there was a choice between two democrats or two republicans ! 
 ```{r}
-district_level <-  sv_precinct |>
+district_level <-  sr_precinct |>
     group_by(DISTRICT)|>
     summarize(DEM01 = sum(DEM01, na.rm= T),
     DEM02 = sum(DEM02, na.rm = T),
@@ -36,7 +36,8 @@ district_level <-  sv_precinct |>
 
 district_vi <- district_level |>
     filter(DEM02 == 0 & REP02 == 0)|>
-    mutate(v_i = DEM01 / (TOTVOTE))
+    mutate(v_i = DEM01 / (TOTVOTE))|>
+    drop_na(v_i)
 
 mean_median <- district_vi |> 
     summarize(democratscore = mean(v_i)-median(v_i))
@@ -56,7 +57,7 @@ democratscore_fn <- function(data, index) {
   mean(d$v_i) - median(d$v_i)
 }
 set.seed(123)
-boot_res <- boot(district_vi, democratscore_fn, R = 2000)
+boot_res <- boot(district_vi, democratscore_fn, R = 2000, )
 
 boot.ci(boot_res, type = "perc")
 ```
@@ -71,7 +72,7 @@ n_wasted <- function(by, against) {
     n_wasted <- ifelse(by > against, by - w_threshold, by)
     n_wasted
 }
-ES <- district_vi |>
+ES <- district_level |>
 mutate(wasted_D = n_wasted(DEM01, REP01),
       wasted_R = n_wasted(REP01, DEM01))|>
 summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(TOTVOTE)))
@@ -141,7 +142,7 @@ ab604 <- st_read("/Users/sachabondeville/Documents/stat133/Projects/Project-5/ge
 ab604 <- ab604 |>
     mutate(DISTRICT = as.double(DISTRICT))
 
-sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
+
 
 ```
 
@@ -197,7 +198,7 @@ The mean-median score increased in favor of the democrats, but the result is sti
 ### Efficiency Score : 
 
 ```{r}
-hypo_ES <- hypo_district_vi |>
+hypo_ES <- hypo_districts |>
 mutate(wasted_D = n_wasted(DEM_est, REP_est),
       wasted_R = n_wasted(REP_est, DEM_est))|>
 summarize(EG = (sum(wasted_D)+sum(wasted_R))/(sum(DEM_est + REP_est)))
