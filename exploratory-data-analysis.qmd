@@ -5,10 +5,13 @@ author : Sacha Bondeville
 ---
 
 ```{r}
+#| warning: false
+#| echo: false
 library(tidyverse)
 library(boot)
 library(plotly)
-sv_precinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_svprecinct.csv")
+sr_precinct <- read.csv("/Users/sachabondeville/Documents/stat133/Projects/Project-5/gerrymandering-sachabdvl/data/cleaned_srprecinct.csv")
+
 
 ```
 
@@ -22,7 +25,7 @@ sv_precinct <- read.csv("Projects/Project-5/gerrymandering-sachabdvl/data/cleane
 ```{r}
 
 
-district_level <-  sv_precinct |>
+district_level <-  sr_precinct |>
     filter(!(DEM02 > 0),
     !(REP02 > 0))|>
     group_by(DISTRICT)|>
@@ -86,7 +89,7 @@ district_level |>
     slice(1)
 ```
 
-The Orange County has the highest number of republican votes given democrat votes, which is not that surprising given the disparity of its social groups. 
+The 1st district has the highest number of republican vote given the number of democrat votes.
 
 
 ### Question 4
@@ -99,10 +102,10 @@ The Orange County has the highest number of republican votes given democrat vote
 ```{r}
 
 
-county_level <-  sv_precinct |>
+county_level <-  sr_precinct |>
     filter(!(DEM02 > 0),
     !(REP02 > 0))|>
-    group_by(COUNTY, DISTRICT)|>
+    group_by(COUNTY)|>
     summarize(DEM = sum(DEM01, na.rm= T), 
     REP = sum(REP01, na.rm = T),
     TOTVOTE = sum(TOTVOTE, na.rm = T))|>
@@ -139,6 +142,8 @@ g1 <-  county_level |>
     values = c(
       "DEM" = "#6090F7",
       "REP" = "#FA6E52"))+ 
+    scale_y_log10()+
+    scale_x_log10()+
     theme_minimal(base_family = "Arial")+
     labs(title = "Association: dem and rep vote (county lvl)", 
     x = "# of Democrat votes", 
@@ -163,7 +168,7 @@ county_level |>
     slice(1)
 ```
 
-The Orange County has the highest number of republican votes given democrat votes, which is not that surprising given the disparity of its social groups. 
+The Orange county has the highest number of republican votes given democrat votes ! Not surprising given the disparity of this LA county. 
 
 
 
