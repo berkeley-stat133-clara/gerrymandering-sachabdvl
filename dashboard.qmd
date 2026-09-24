@@ -5,6 +5,10 @@ format:
         orientation : columns
         theme : zephyr
         card-style: none
+        nav-buttons : 
+            - icon: linkedin
+              href: https://www.linkedin.com/in/sacha-bondeville/
+        scrolling : true
 author : Sacha Bondeville
 ---
 
@@ -93,7 +97,7 @@ domain = districts$WINNER
 )
 
 interact_map <- leaflet(districts) |>
-addProviderTiles("CartoDB.Positron")|>
+addProviderTiles("Esri.WorldGrayCanvas")|>
 addPolygons( 
 fillColor = ~pal_discrete(WINNER),
 color = "black",
@@ -174,7 +178,7 @@ domain = hypo_districts$WINNER
 )
 
 interact_map_hypo <- leaflet(hypo_districts) |>
-addProviderTiles("CartoDB.Positron")|>
+addProviderTiles("Esri.WorldGrayCanvas")|>
 addPolygons( 
 fillColor = ~pal_discrete(WINNER),
 color = "black",

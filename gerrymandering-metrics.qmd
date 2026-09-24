@@ -255,7 +255,7 @@ domain = districts$WINNER
 
 # Actual results: 
 leaflet(districts) |>
-addProviderTiles("CartoDB.Positron")|>
+addProviderTiles("Esri.WorldGrayCanvas")|>
 addPolygons( 
 fillColor = ~pal_discrete(WINNER),
 color = "black",
@@ -271,7 +271,7 @@ position = "bottomright"
 
 #Hypothetical results: 
 leaflet(hypo_districts) |>
-addProviderTiles("CartoDB.Positron")|>
+addProviderTiles("Esri.WorldGrayCanvas")|>
 addPolygons( 
 fillColor = ~pal_discrete(WINNER),
 color = "black",

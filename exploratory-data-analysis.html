@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sacha Bondeville">
+
+<title>Exploratory Data Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="exploratory-data-analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="exploratory-data-analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="exploratory-data-analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="exploratory-data-analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="exploratory-data-analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="exploratory-data-analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="exploratory-data-analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="exploratory-data-analysis_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="exploratory-data-analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="exploratory-data-analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="exploratory-data-analysis_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="exploratory-data-analysis_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="exploratory-data-analysis_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="exploratory-data-analysis_files/libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="exploratory-data-analysis_files/libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="exploratory-data-analysis_files/libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="exploratory-data-analysis_files/libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="exploratory-data-analysis_files/libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="exploratory-data-analysis_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="exploratory-data-analysis_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Exploratory Data Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sacha Bondeville </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="question-1" class="level3">
+<h3 class="anchored" data-anchor-id="question-1">Question 1</h3>
+<p><em>What is the total distribution of vote counts at <strong>the district level</strong> ?</em></p>
+</section>
+<section id="answer-1" class="level3">
+<h3 class="anchored" data-anchor-id="answer-1">Answer 1</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>district_level <span class="ot">&lt;-</span>  sr_precinct <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span>(DEM02 <span class="sc">&gt;</span> <span class="dv">0</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>(REP02 <span class="sc">&gt;</span> <span class="dv">0</span>))<span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(DISTRICT)<span class="sc">|&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">DEM =</span> <span class="fu">sum</span>(DEM01, <span class="at">na.rm=</span> T), </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">REP =</span> <span class="fu">sum</span>(REP01, <span class="at">na.rm =</span> T),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">TOTVOTE =</span> <span class="fu">sum</span>(TOTVOTE, <span class="at">na.rm =</span> T))<span class="sc">|&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">WINNER=</span> <span class="fu">ifelse</span>(DEM <span class="sc">&gt;</span> REP, <span class="st">"DEM"</span>, <span class="st">"REP"</span>))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>district_level <span class="sc">|&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> TOTVOTE))<span class="sc">+</span><span class="fu">geom_histogram</span>(<span class="at">fill =</span> <span class="st">"goldenrod"</span>)<span class="sc">+</span> </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribution of votes (district lvl)"</span>, </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"#Total votes"</span>, </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y  =</span> <span class="st">"Count"</span>)<span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">"Arial"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exploratory-data-analysis_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="question-2" class="level3">
+<h3 class="anchored" data-anchor-id="question-2">Question 2 :</h3>
+<p>What is the association between number of democrat vote and number of republican vote at the district level ?</p>
+</section>
+<section id="answer-2" class="level3">
+<h3 class="anchored" data-anchor-id="answer-2">Answer 2:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">lm</span>((REP)<span class="sc">~</span>(DEM), <span class="at">data =</span> district_level)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>g2 <span class="ot">&lt;-</span>  district_level <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> DEM, <span class="at">y =</span> REP))<span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> <span class="st">"lightblue"</span>, <span class="at">se =</span> F)<span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">text =</span> <span class="fu">paste</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DISTRICT:"</span>, DISTRICT,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;br&gt;Democrat votes:"</span>, DEM,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;br&gt;Republican votes:"</span>, REP,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;br&gt;Total votes:"</span>, TOTVOTE), <span class="at">color =</span> WINNER))<span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"DEM"</span> <span class="ot">=</span> <span class="st">"#6090F7"</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">"REP"</span> <span class="ot">=</span> <span class="st">"#FA6E52"</span>))<span class="sc">+</span> </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">"Arial"</span>)<span class="sc">+</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Association: dem and rep vote (district lvl)"</span>, </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"# of Democrat votes"</span>, </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"# of Republican votes"</span>, </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="fu">paste</span>(<span class="st">"the slope coefficient of our linear model is of :"</span>,<span class="fu">round</span>(m2[[<span class="dv">1</span>]][<span class="dv">2</span>], <span class="dv">4</span>)))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(g2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-9818b428bd1a28e57205" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-9818b428bd1a28e57205">{"x":{"data":[{"x":[0,196901.93670886077,393803.87341772154,590705.81012658228,787607.74683544307,984509.68354430387,1181411.6202531646,1378313.5569620254,1575215.4936708861,1772117.4303797469,1969019.3670886077,2165921.3037974685,2362823.2405063291,2559725.1772151901,2756627.1139240507,2953529.0506329117,3150430.9873417723,3347332.9240506329,3544234.8607594939,3741136.7974683545,3938038.7341772155,4134940.6708860761,4331842.6075949371,4528744.5443037981,4725646.4810126582,4922548.4177215192,5119450.3544303803,5316352.2911392404,5513254.2278481014,5710156.1645569624,5907058.1012658235,6103960.0379746836,6300861.9746835446,6497763.9113924056,6694665.8481012657,6891567.7848101268,7088469.7215189878,7285371.6582278488,7482273.5949367089,7679175.53164557,7876077.468354431,8072979.4050632911,8269881.3417721521,8466783.2784810122,8663685.2151898742,8860587.1518987343,9057489.0886075962,9254391.0253164563,9451292.9620253164,9648194.8987341784,9845096.8354430385,10041998.772151899,10238900.708860761,10435802.645569621,10632704.582278481,10829606.518987343,11026508.455696203,11223410.392405063,11420312.329113925,11617214.265822785,11814116.202531647,12011018.139240507,12207920.075949367,12404822.012658229,12601723.949367089,12798625.886075949,12995527.822784811,13192429.759493671,13389331.696202531,13586233.632911393,13783135.569620254,13980037.506329115,14176939.443037976,14373841.379746836,14570743.316455698,14767645.253164558,14964547.189873418,15161449.12658228,15358351.06329114,15555253],"y":[1353481.5774535818,1440095.4165442439,1526709.255634906,1613323.0947255681,1699936.9338162299,1786550.772906892,1873164.6119975541,1959778.4510882162,2046392.2901788782,2133006.1292695403,2219619.9683602024,2306233.8074508645,2392847.6465415265,2479461.4856321886,2566075.3247228507,2652689.1638135128,2739303.0029041744,2825916.8419948365,2912530.6810854985,2999144.5201761606,3085758.3592668227,3172372.1983574848,3258986.0374481468,3345599.8765388089,3432213.715629471,3518827.5547201331,3605441.3938107952,3692055.2329014568,3778669.0719921193,3865282.9110827814,3951896.7501734435,4038510.5892641051,4125124.4283547672,4211738.2674454292,4298352.1065360913,4384965.9456267534,4471579.7847174155,4558193.6238080775,4644807.4628987396,4731421.3019894017,4818035.1410800638,4904648.9801707258,4991262.8192613879,5077876.6583520491,5164490.4974427121,5251104.3365333742,5337718.1756240362,5424332.0147146983,5510945.8538053595,5597559.6928960225,5684173.5319866845,5770787.3710773457,5857401.2101680087,5944015.0492586708,6030628.8883493319,6117242.7274399949,6203856.5665306561,6290470.4056213181,6377084.2447119812,6463698.0838026423,6550311.9228933053,6636925.7619839665,6723539.6010746285,6810153.4401652915,6896767.2792559527,6983381.1183466148,7069994.9574372768,7156608.7965279389,7243222.635618601,7329836.4747092631,7416450.3137999251,7503064.1528905872,7589677.9919812493,7676291.8310719114,7762905.6701625735,7849519.5092532355,7936133.3483438976,8022747.1874345597,8109361.0265252218,8195974.8656158829],"text":["DEM:        0.0<br />REP: 1353482","DEM:   196901.9<br />REP: 1440095","DEM:   393803.9<br />REP: 1526709","DEM:   590705.8<br />REP: 1613323","DEM:   787607.7<br />REP: 1699937","DEM:   984509.7<br />REP: 1786551","DEM:  1181411.6<br />REP: 1873165","DEM:  1378313.6<br />REP: 1959778","DEM:  1575215.5<br />REP: 2046392","DEM:  1772117.4<br />REP: 2133006","DEM:  1969019.4<br />REP: 2219620","DEM:  2165921.3<br />REP: 2306234","DEM:  2362823.2<br />REP: 2392848","DEM:  2559725.2<br />REP: 2479461","DEM:  2756627.1<br />REP: 2566075","DEM:  2953529.1<br />REP: 2652689","DEM:  3150431.0<br />REP: 2739303","DEM:  3347332.9<br />REP: 2825917","DEM:  3544234.9<br />REP: 2912531","DEM:  3741136.8<br />REP: 2999145","DEM:  3938038.7<br />REP: 3085758","DEM:  4134940.7<br />REP: 3172372","DEM:  4331842.6<br />REP: 3258986","DEM:  4528744.5<br />REP: 3345600","DEM:  4725646.5<br />REP: 3432214","DEM:  4922548.4<br />REP: 3518828","DEM:  5119450.4<br />REP: 3605441","DEM:  5316352.3<br />REP: 3692055","DEM:  5513254.2<br />REP: 3778669","DEM:  5710156.2<br />REP: 3865283","DEM:  5907058.1<br />REP: 3951897","DEM:  6103960.0<br />REP: 4038511","DEM:  6300862.0<br />REP: 4125124","DEM:  6497763.9<br />REP: 4211738","DEM:  6694665.8<br />REP: 4298352","DEM:  6891567.8<br />REP: 4384966","DEM:  7088469.7<br />REP: 4471580","DEM:  7285371.7<br />REP: 4558194","DEM:  7482273.6<br />REP: 4644807","DEM:  7679175.5<br />REP: 4731421","DEM:  7876077.5<br />REP: 4818035","DEM:  8072979.4<br />REP: 4904649","DEM:  8269881.3<br />REP: 4991263","DEM:  8466783.3<br />REP: 5077877","DEM:  8663685.2<br />REP: 5164490","DEM:  8860587.2<br />REP: 5251104","DEM:  9057489.1<br />REP: 5337718","DEM:  9254391.0<br />REP: 5424332","DEM:  9451293.0<br />REP: 5510946","DEM:  9648194.9<br />REP: 5597560","DEM:  9845096.8<br />REP: 5684174","DEM: 10041998.8<br />REP: 5770787","DEM: 10238900.7<br />REP: 5857401","DEM: 10435802.6<br />REP: 5944015","DEM: 10632704.6<br />REP: 6030629","DEM: 10829606.5<br />REP: 6117243","DEM: 11026508.5<br />REP: 6203857","DEM: 11223410.4<br />REP: 6290470","DEM: 11420312.3<br />REP: 6377084","DEM: 11617214.3<br />REP: 6463698","DEM: 11814116.2<br />REP: 6550312","DEM: 12011018.1<br />REP: 6636926","DEM: 12207920.1<br />REP: 6723540","DEM: 12404822.0<br />REP: 6810153","DEM: 12601723.9<br />REP: 6896767","DEM: 12798625.9<br />REP: 6983381","DEM: 12995527.8<br />REP: 7069995","DEM: 13192429.8<br />REP: 7156609","DEM: 13389331.7<br />REP: 7243223","DEM: 13586233.6<br />REP: 7329836","DEM: 13783135.6<br />REP: 7416450","DEM: 13980037.5<br />REP: 7503064","DEM: 14176939.4<br />REP: 7589678","DEM: 14373841.4<br />REP: 7676292","DEM: 14570743.3<br />REP: 7762906","DEM: 14767645.3<br />REP: 7849520","DEM: 14964547.2<br />REP: 7936133","DEM: 15161449.1<br />REP: 8022747","DEM: 15358351.1<br />REP: 8109361","DEM: 15555253.0<br />REP: 8195975"],"type":"scatter","mode":"lines","name":"fitted values","line":{"width":3.7795275590551185,"color":"rgba(173,216,230,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[12353039,9159262,4606527,6848853,8182983,7035610,6265067,3154218,8474129,7495057,5899560,4600596,9180243,6676583,7910774,6291168,2556359,6427903,9629291,5228104,9089348,5535985,9208797,3484099,3223490,15555253,5624068,6193335,5187273,7918422,7495432,6455820,6458664,3391370,5010083,3815773,4481489,3209132,2790565],"y":[4826685,5302736,3363900,3099730,2714605,6363152,3055085,753395,4129848,2733791,2809151,2564721,4556372,5376608,5259637,4833785,1927464,6175116,4886761,2201495,4454269,3851388,4632366,2376101,2276920,7318887,0,4042424,3871605,7581111,3446503,2538914,2654105,1847292,4842954,3650492,2464561,2021671,1415184],"text":["DEM: 12353039<br />REP:  4826685<br />DISTRICT: 2 <br>Democrat votes: 12353039 <br>Republican votes: 4826685 <br>Total votes: 17179724<br />WINNER: DEM","DEM:  9159262<br />REP:  5302736<br />DISTRICT: 4 <br>Democrat votes: 9159262 <br>Republican votes: 5302736 <br>Total votes: 14461998<br />WINNER: DEM","DEM:  4606527<br />REP:  3363900<br />DISTRICT: 6 <br>Democrat votes: 4606527 <br>Republican votes: 3363900 <br>Total votes: 7970427<br />WINNER: DEM","DEM:  6848853<br />REP:  3099730<br />DISTRICT: 7 <br>Democrat votes: 6848853 <br>Republican votes: 3099730 <br>Total votes: 9948583<br />WINNER: DEM","DEM:  8182983<br />REP:  2714605<br />DISTRICT: 8 <br>Democrat votes: 8182983 <br>Republican votes: 2714605 <br>Total votes: 10897588<br />WINNER: DEM","DEM:  7035610<br />REP:  6363152<br />DISTRICT: 9 <br>Democrat votes: 7035610 <br>Republican votes: 6363152 <br>Total votes: 13398762<br />WINNER: DEM","DEM:  6265067<br />REP:  3055085<br />DISTRICT: 10 <br>Democrat votes: 6265067 <br>Republican votes: 3055085 <br>Total votes: 9320152<br />WINNER: DEM","DEM:  3154218<br />REP:   753395<br />DISTRICT: 11 <br>Democrat votes: 3154218 <br>Republican votes: 753395 <br>Total votes: 3907613<br />WINNER: DEM","DEM:  8474129<br />REP:  4129848<br />DISTRICT: 14 <br>Democrat votes: 8474129 <br>Republican votes: 4129848 <br>Total votes: 12603977<br />WINNER: DEM","DEM:  7495057<br />REP:  2733791<br />DISTRICT: 15 <br>Democrat votes: 7495057 <br>Republican votes: 2733791 <br>Total votes: 10228848<br />WINNER: DEM","DEM:  5899560<br />REP:  2809151<br />DISTRICT: 17 <br>Democrat votes: 5899560 <br>Republican votes: 2809151 <br>Total votes: 8708711<br />WINNER: DEM","DEM:  4600596<br />REP:  2564721<br />DISTRICT: 18 <br>Democrat votes: 4600596 <br>Republican votes: 2564721 <br>Total votes: 7165317<br />WINNER: DEM","DEM:  9180243<br />REP:  4556372<br />DISTRICT: 19 <br>Democrat votes: 9180243 <br>Republican votes: 4556372 <br>Total votes: 13736615<br />WINNER: DEM","DEM:  6676583<br />REP:  5376608<br />DISTRICT: 21 <br>Democrat votes: 6676583 <br>Republican votes: 5376608 <br>Total votes: 12053191<br />WINNER: DEM","DEM:  7910774<br />REP:  5259637<br />DISTRICT: 24 <br>Democrat votes: 7910774 <br>Republican votes: 5259637 <br>Total votes: 13170411<br />WINNER: DEM","DEM:  6291168<br />REP:  4833785<br />DISTRICT: 25 <br>Democrat votes: 6291168 <br>Republican votes: 4833785 <br>Total votes: 11124953<br />WINNER: DEM","DEM:  2556359<br />REP:  1927464<br />DISTRICT: 26 <br>Democrat votes: 2556359 <br>Republican votes: 1927464 <br>Total votes: 4483823<br />WINNER: DEM","DEM:  6427903<br />REP:  6175116<br />DISTRICT: 27 <br>Democrat votes: 6427903 <br>Republican votes: 6175116 <br>Total votes: 12603019<br />WINNER: DEM","DEM:  9629291<br />REP:  4886761<br />DISTRICT: 28 <br>Democrat votes: 9629291 <br>Republican votes: 4886761 <br>Total votes: 14516052<br />WINNER: DEM","DEM:  5228104<br />REP:  2201495<br />DISTRICT: 29 <br>Democrat votes: 5228104 <br>Republican votes: 2201495 <br>Total votes: 7429599<br />WINNER: DEM","DEM:  9089348<br />REP:  4454269<br />DISTRICT: 30 <br>Democrat votes: 9089348 <br>Republican votes: 4454269 <br>Total votes: 13543617<br />WINNER: DEM","DEM:  5535985<br />REP:  3851388<br />DISTRICT: 31 <br>Democrat votes: 5535985 <br>Republican votes: 3851388 <br>Total votes: 9387373<br />WINNER: DEM","DEM:  9208797<br />REP:  4632366<br />DISTRICT: 32 <br>Democrat votes: 9208797 <br>Republican votes: 4632366 <br>Total votes: 13841163<br />WINNER: DEM","DEM:  3484099<br />REP:  2376101<br />DISTRICT: 33 <br>Democrat votes: 3484099 <br>Republican votes: 2376101 <br>Total votes: 5860200<br />WINNER: DEM","DEM:  3223490<br />REP:  2276920<br />DISTRICT: 35 <br>Democrat votes: 3223490 <br>Republican votes: 2276920 <br>Total votes: 5500410<br />WINNER: DEM","DEM: 15555253<br />REP:  7318887<br />DISTRICT: 36 <br>Democrat votes: 15555253 <br>Republican votes: 7318887 <br>Total votes: 22874140<br />WINNER: DEM","DEM:  5624068<br />REP:        0<br />DISTRICT: 37 <br>Democrat votes: 5624068 <br>Republican votes: 0 <br>Total votes: 5624068<br />WINNER: DEM","DEM:  6193335<br />REP:  4042424<br />DISTRICT: 38 <br>Democrat votes: 6193335 <br>Republican votes: 4042424 <br>Total votes: 10235759<br />WINNER: DEM","DEM:  5187273<br />REP:  3871605<br />DISTRICT: 39 <br>Democrat votes: 5187273 <br>Republican votes: 3871605 <br>Total votes: 9058878<br />WINNER: DEM","DEM:  7918422<br />REP:  7581111<br />DISTRICT: 41 <br>Democrat votes: 7918422 <br>Republican votes: 7581111 <br>Total votes: 15499533<br />WINNER: DEM","DEM:  7495432<br />REP:  3446503<br />DISTRICT: 42 <br>Democrat votes: 7495432 <br>Republican votes: 3446503 <br>Total votes: 10941935<br />WINNER: DEM","DEM:  6455820<br />REP:  2538914<br />DISTRICT: 43 <br>Democrat votes: 6455820 <br>Republican votes: 2538914 <br>Total votes: 8994734<br />WINNER: DEM","DEM:  6458664<br />REP:  2654105<br />DISTRICT: 44 <br>Democrat votes: 6458664 <br>Republican votes: 2654105 <br>Total votes: 9112769<br />WINNER: DEM","DEM:  3391370<br />REP:  1847292<br />DISTRICT: 46 <br>Democrat votes: 3391370 <br>Republican votes: 1847292 <br>Total votes: 5238662<br />WINNER: DEM","DEM:  5010083<br />REP:  4842954<br />DISTRICT: 47 <br>Democrat votes: 5010083 <br>Republican votes: 4842954 <br>Total votes: 9853037<br />WINNER: DEM","DEM:  3815773<br />REP:  3650492<br />DISTRICT: 49 <br>Democrat votes: 3815773 <br>Republican votes: 3650492 <br>Total votes: 7466265<br />WINNER: DEM","DEM:  4481489<br />REP:  2464561<br />DISTRICT: 50 <br>Democrat votes: 4481489 <br>Republican votes: 2464561 <br>Total votes: 6946050<br />WINNER: DEM","DEM:  3209132<br />REP:  2021671<br />DISTRICT: 51 <br>Democrat votes: 3209132 <br>Republican votes: 2021671 <br>Total votes: 5230803<br />WINNER: DEM","DEM:  2790565<br />REP:  1415184<br />DISTRICT: 52 <br>Democrat votes: 2790565 <br>Republican votes: 1415184 <br>Total votes: 4205749<br />WINNER: DEM"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(96,144,247,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(96,144,247,1)"}},"hoveron":"points","name":"DEM","legendgroup":"DEM","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[5756848,7501389,5785272,0,2777732,0,0,3275142,4617254,0,3756788,3642431,3283002],"y":[11478221,8716410,9308918,0,2803985,0,7,3679989,7626953,0,4628679,3678464,4904262],"text":["DEM:  5756848<br />REP: 11478221<br />DISTRICT: 1 <br>Democrat votes: 5756848 <br>Republican votes: 11478221 <br>Total votes: 17235069<br />WINNER: REP","DEM:  7501389<br />REP:  8716410<br />DISTRICT: 3 <br>Democrat votes: 7501389 <br>Republican votes: 8716410 <br>Total votes: 16217799<br />WINNER: REP","DEM:  5785272<br />REP:  9308918<br />DISTRICT: 5 <br>Democrat votes: 5785272 <br>Republican votes: 9308918 <br>Total votes: 15094190<br />WINNER: REP","DEM:        0<br />REP:        0<br />DISTRICT: 12 <br>Democrat votes: 0 <br>Republican votes: 0 <br>Total votes: 0<br />WINNER: REP","DEM:  2777732<br />REP:  2803985<br />DISTRICT: 13 <br>Democrat votes: 2777732 <br>Republican votes: 2803985 <br>Total votes: 5581717<br />WINNER: REP","DEM:        0<br />REP:        0<br />DISTRICT: 16 <br>Democrat votes: 0 <br>Republican votes: 0 <br>Total votes: 0<br />WINNER: REP","DEM:        0<br />REP:        7<br />DISTRICT: 20 <br>Democrat votes: 0 <br>Republican votes: 7 <br>Total votes: 7<br />WINNER: REP","DEM:  3275142<br />REP:  3679989<br />DISTRICT: 22 <br>Democrat votes: 3275142 <br>Republican votes: 3679989 <br>Total votes: 6955131<br />WINNER: REP","DEM:  4617254<br />REP:  7626953<br />DISTRICT: 23 <br>Democrat votes: 4617254 <br>Republican votes: 7626953 <br>Total votes: 12244207<br />WINNER: REP","DEM:        0<br />REP:        0<br />DISTRICT: 34 <br>Democrat votes: 0 <br>Republican votes: 0 <br>Total votes: 0<br />WINNER: REP","DEM:  3756788<br />REP:  4628679<br />DISTRICT: 40 <br>Democrat votes: 3756788 <br>Republican votes: 4628679 <br>Total votes: 8385467<br />WINNER: REP","DEM:  3642431<br />REP:  3678464<br />DISTRICT: 45 <br>Democrat votes: 3642431 <br>Republican votes: 3678464 <br>Total votes: 7320895<br />WINNER: REP","DEM:  3283002<br />REP:  4904262<br />DISTRICT: 48 <br>Democrat votes: 3283002 <br>Republican votes: 4904262 <br>Total votes: 8187264<br />WINNER: REP"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(250,110,82,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(250,110,82,1)"}},"hoveron":"points","name":"REP","legendgroup":"REP","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":66.484018264840202},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724},"title":{"text":"Association: dem and rep vote (district lvl)","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-777762.65000000002,16333015.65],"tickmode":"array","ticktext":["0.0e+00","5.0e+06","1.0e+07","1.5e+07"],"tickvals":[0,4999999.9999999991,10000000,15000000],"categoryorder":"array","categoryarray":["0.0e+00","5.0e+06","1.0e+07","1.5e+07"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"Arial","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"# of Democrat votes","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-573911.05000000005,12052132.050000001],"tickmode":"array","ticktext":["0.0e+00","3.0e+06","6.0e+06","9.0e+06","1.2e+07"],"tickvals":[0,3000000,6000000,9000000,12000000],"categoryorder":"array","categoryarray":["0.0e+00","3.0e+06","6.0e+06","9.0e+06","1.2e+07"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"Arial","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"# of Republican votes","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"Arial","size":11.68949771689498},"title":{"text":"WINNER","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"641354464696":{"x":{},"y":{},"type":"scatter"},"641351c44d13":{"x":{},"y":{},"text":{},"colour":{}}},"cur_data":"641354464696","visdat":{"641354464696":["function (y) ","x"],"641351c44d13":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="question-3" class="level3">
+<h3 class="anchored" data-anchor-id="question-3">Question 3:</h3>
+<p><em>What is the district with the highest number of republican votes given their number of democrat votes ?</em></p>
+</section>
+<section id="answer-3" class="level3">
+<h3 class="anchored" data-anchor-id="answer-3">Answer 3:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>district_level <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()<span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">residual =</span> <span class="fu">resid</span>(m2))<span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(residual))<span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(DISTRICT)<span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+  DISTRICT
+     &lt;int&gt;
+1        1</code></pre>
+</div>
+</div>
+<p>The 1st district has the highest number of republican vote given the number of democrat votes.</p>
+</section>
+<section id="question-4" class="level3">
+<h3 class="anchored" data-anchor-id="question-4">Question 4</h3>
+<p><em>What is the total distribution of vote counts at <strong>the county level</strong> ?</em></p>
+</section>
+<section id="answer-4" class="level3">
+<h3 class="anchored" data-anchor-id="answer-4">Answer 4</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>county_level <span class="ot">&lt;-</span>  sr_precinct <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span>(DEM02 <span class="sc">&gt;</span> <span class="dv">0</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>(REP02 <span class="sc">&gt;</span> <span class="dv">0</span>))<span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(COUNTY)<span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">DEM =</span> <span class="fu">sum</span>(DEM01, <span class="at">na.rm=</span> T), </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">REP =</span> <span class="fu">sum</span>(REP01, <span class="at">na.rm =</span> T),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">TOTVOTE =</span> <span class="fu">sum</span>(TOTVOTE, <span class="at">na.rm =</span> T))<span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">WINNER=</span> <span class="fu">ifelse</span>(DEM <span class="sc">&gt;</span> REP, <span class="st">"DEM"</span>, <span class="st">"REP"</span>))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>county_level <span class="sc">|&gt;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> TOTVOTE))<span class="sc">+</span><span class="fu">geom_histogram</span>(<span class="at">fill =</span> <span class="st">"goldenrod"</span>)<span class="sc">+</span> </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribution of votes (county lvl)"</span>, </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"#Total votes"</span>, </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y  =</span> <span class="st">"Count"</span>)<span class="sc">+</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">"Arial"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exploratory-data-analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="question-5" class="level3">
+<h3 class="anchored" data-anchor-id="question-5">Question 5 :</h3>
+<p>What is the association between number of democrat vote and number of republican vote at the county level ?</p>
+</section>
+<section id="answer-5" class="level3">
+<h3 class="anchored" data-anchor-id="answer-5">Answer 5:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>((REP)<span class="sc">~</span>(DEM), <span class="at">data =</span> county_level)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span>  county_level <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> DEM, <span class="at">y =</span> REP))<span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> <span class="st">"lightblue"</span>, <span class="at">se =</span> F)<span class="sc">+</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">text =</span> <span class="fu">paste</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"COUNTY:"</span>, COUNTY,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;br&gt;Democrat votes:"</span>, DEM,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;br&gt;Republican votes:"</span>, REP,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;br&gt;Total votes:"</span>, TOTVOTE), <span class="at">color =</span> WINNER))<span class="sc">+</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"DEM"</span> <span class="ot">=</span> <span class="st">"#6090F7"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">"REP"</span> <span class="ot">=</span> <span class="st">"#FA6E52"</span>))<span class="sc">+</span> </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_log10</span>()<span class="sc">+</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_log10</span>()<span class="sc">+</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">"Arial"</span>)<span class="sc">+</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Association: dem and rep vote (county lvl)"</span>, </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"# of Democrat votes"</span>, </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"# of Republican votes"</span>, </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="fu">paste</span>(<span class="st">"the slope coefficient of our linear model is of :"</span>,<span class="fu">round</span>(m1[[<span class="dv">1</span>]][<span class="dv">2</span>], <span class="dv">4</span>)))</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(g1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-6ca9e69c44eef6ddde17" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-6ca9e69c44eef6ddde17">{"x":{"data":[{"x":[4.0448140475286385,4.0945547486946356,4.1442954498606328,4.19403615102663,4.2437768521926271,4.2935175533586243,4.3432582545246214,4.3929989556906186,4.4427396568566158,4.4924803580226129,4.5422210591886101,4.5919617603546072,4.6417024615206044,4.6914431626866016,4.7411838638525987,4.7909245650185959,4.840665266184593,4.8904059673505902,4.9401466685165873,4.9898873696825845,5.0396280708485817,5.0893687720145788,5.139109473180576,5.1888501743465731,5.2385908755125694,5.2883315766785675,5.3380722778445637,5.3878129790105618,5.437553680176558,5.4872943813425561,5.5370350825085524,5.5867757836745504,5.6365164848405467,5.6862571860065447,5.735997887172541,5.785738588338539,5.8354792895045353,5.8852199906705334,5.9349606918365296,5.9847013930025277,6.034442094168524,6.084182795334522,6.1339234965005183,6.1836641976665163,6.2334048988325126,6.2831455999985106,6.3328863011645069,6.382627002330505,6.4323677034965012,6.4821084046624984,6.5318491058284955,6.5815898069944927,6.6313305081604899,6.681071209326487,6.7308119104924842,6.7805526116584813,6.8302933128244785,6.8800340139904756,6.9297747151564728,6.97951541632247,7.0292561174884671,7.0789968186544643,7.1287375198204614,7.1784782209864586,7.2282189221524558,7.2779596233184529,7.3277003244844501,7.3774410256504472,7.4271817268164444,7.4769224279824416,7.5266631291484387,7.5764038303144359,7.626144531480433,7.6758852326464302,7.7256259338124273,7.7753666349784245,7.8251073361444217,7.8748480373104188,7.924588738476416,7.9743294396424131],"y":[4.4180420298472241,4.4581167221810976,4.4981914145149711,4.5382661068488446,4.5783407991827181,4.6184154915165916,4.6584901838504642,4.6985648761843377,4.7386395685182112,4.7787142608520847,4.8187889531859582,4.8588636455198317,4.8989383378537052,4.9390130301875788,4.9790877225214523,5.0191624148553258,5.0592371071891993,5.0993117995230728,5.1393864918569463,5.1794611841908198,5.2195358765246933,5.2596105688585668,5.2996852611924403,5.3397599535263138,5.3798346458601864,5.41990933819406,5.4599840305279335,5.500058722861807,5.5401334151956796,5.580208107529554,5.6202827998634266,5.660357492197301,5.7004321845311736,5.740506876865048,5.7805815691989206,5.820656261532795,5.8607309538666676,5.900805646200542,5.9408803385344147,5.9809550308682891,6.0210297232021617,6.0611044155360361,6.1011791078699087,6.1412538002037822,6.1813284925376557,6.2214031848715292,6.2614778772054027,6.3015525695392762,6.3416272618731488,6.3817019542070224,6.4217766465408959,6.4618513388747694,6.5019260312086429,6.5420007235425164,6.5820754158763899,6.6221501082102634,6.6622248005441369,6.7022994928780104,6.7423741852118839,6.7824488775457574,6.8225235698796309,6.8625982622135044,6.9026729545473779,6.9427476468812515,6.982822339215125,7.0228970315489985,7.0629717238828711,7.1030464162167446,7.1431211085506181,7.1831958008844916,7.2232704932183651,7.2633451855522386,7.3034198778861121,7.3434945702199856,7.3835692625538591,7.4236439548877327,7.4637186472216062,7.5037933395554797,7.5438680318893532,7.5839427242232267],"text":["DEM: 4.044814<br />REP: 4.418042","DEM: 4.094555<br />REP: 4.458117","DEM: 4.144295<br />REP: 4.498191","DEM: 4.194036<br />REP: 4.538266","DEM: 4.243777<br />REP: 4.578341","DEM: 4.293518<br />REP: 4.618415","DEM: 4.343258<br />REP: 4.658490","DEM: 4.392999<br />REP: 4.698565","DEM: 4.442740<br />REP: 4.738640","DEM: 4.492480<br />REP: 4.778714","DEM: 4.542221<br />REP: 4.818789","DEM: 4.591962<br />REP: 4.858864","DEM: 4.641702<br />REP: 4.898938","DEM: 4.691443<br />REP: 4.939013","DEM: 4.741184<br />REP: 4.979088","DEM: 4.790925<br />REP: 5.019162","DEM: 4.840665<br />REP: 5.059237","DEM: 4.890406<br />REP: 5.099312","DEM: 4.940147<br />REP: 5.139386","DEM: 4.989887<br />REP: 5.179461","DEM: 5.039628<br />REP: 5.219536","DEM: 5.089369<br />REP: 5.259611","DEM: 5.139109<br />REP: 5.299685","DEM: 5.188850<br />REP: 5.339760","DEM: 5.238591<br />REP: 5.379835","DEM: 5.288332<br />REP: 5.419909","DEM: 5.338072<br />REP: 5.459984","DEM: 5.387813<br />REP: 5.500059","DEM: 5.437554<br />REP: 5.540133","DEM: 5.487294<br />REP: 5.580208","DEM: 5.537035<br />REP: 5.620283","DEM: 5.586776<br />REP: 5.660357","DEM: 5.636516<br />REP: 5.700432","DEM: 5.686257<br />REP: 5.740507","DEM: 5.735998<br />REP: 5.780582","DEM: 5.785739<br />REP: 5.820656","DEM: 5.835479<br />REP: 5.860731","DEM: 5.885220<br />REP: 5.900806","DEM: 5.934961<br />REP: 5.940880","DEM: 5.984701<br />REP: 5.980955","DEM: 6.034442<br />REP: 6.021030","DEM: 6.084183<br />REP: 6.061104","DEM: 6.133923<br />REP: 6.101179","DEM: 6.183664<br />REP: 6.141254","DEM: 6.233405<br />REP: 6.181328","DEM: 6.283146<br />REP: 6.221403","DEM: 6.332886<br />REP: 6.261478","DEM: 6.382627<br />REP: 6.301553","DEM: 6.432368<br />REP: 6.341627","DEM: 6.482108<br />REP: 6.381702","DEM: 6.531849<br />REP: 6.421777","DEM: 6.581590<br />REP: 6.461851","DEM: 6.631331<br />REP: 6.501926","DEM: 6.681071<br />REP: 6.542001","DEM: 6.730812<br />REP: 6.582075","DEM: 6.780553<br />REP: 6.622150","DEM: 6.830293<br />REP: 6.662225","DEM: 6.880034<br />REP: 6.702299","DEM: 6.929775<br />REP: 6.742374","DEM: 6.979515<br />REP: 6.782449","DEM: 7.029256<br />REP: 6.822524","DEM: 7.078997<br />REP: 6.862598","DEM: 7.128738<br />REP: 6.902673","DEM: 7.178478<br />REP: 6.942748","DEM: 7.228219<br />REP: 6.982822","DEM: 7.277960<br />REP: 7.022897","DEM: 7.327700<br />REP: 7.062972","DEM: 7.377441<br />REP: 7.103046","DEM: 7.427182<br />REP: 7.143121","DEM: 7.476922<br />REP: 7.183196","DEM: 7.526663<br />REP: 7.223270","DEM: 7.576404<br />REP: 7.263345","DEM: 7.626145<br />REP: 7.303420","DEM: 7.675885<br />REP: 7.343495","DEM: 7.725626<br />REP: 7.383569","DEM: 7.775367<br />REP: 7.423644","DEM: 7.825107<br />REP: 7.463719","DEM: 7.874848<br />REP: 7.503793","DEM: 7.924589<br />REP: 7.543868","DEM: 7.974329<br />REP: 7.583943"],"type":"scatter","mode":"lines","name":"fitted values","line":{"width":3.7795275590551185,"color":"rgba(173,216,230,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[7.0125866952521125,4.0448140475286385,7.0214882389328457,6.8847772443748791,6.4949886958235261,6.1730128074560309,6.0090355253000123,7.9743294396424131,6.7200545637646334,5.8818751723716671,5.8512687471948581,5.1830932421556151,6.5377783072414282,5.7799988568362961,6.1381008227640095,7.2220237003058054,7.2906361267604911,7.0515495755755335,5.6946718733720756,7.170968335972316,6.5407780557260171,6.8677290464612009,6.6853327720202813,6.8558636077797992,6.6330193851879695,6.9676092317561471,6.5257432647410809,6.6853641412532019,6.7308221514330988,6.4200596034585908,6.6424027847025648],"y":[6.7034298142930506,3.7655940553194451,6.6161999356817764,6.8482515153894319,6.2023752331981683,6.0858458488317702,5.9513234307150968,7.6698279127128464,6.0643523979054734,5.6181349469237416,5.8345370510386045,5.0884160740543241,6.1801628775428821,5.3971506129044045,6.0220603228943368,7.2094970794186972,7.2395931731317971,6.8338926800529318,5.6222482261967412,7.0280074019321379,5.9492743420392102,6.8179979281940861,6.603712807092915,6.4145426818612563,6.474670578207026,6.6447390448684498,5.9304732359939996,6.438450417346762,6.2796299909500775,6.2735304413799673,6.3979367080214322],"text":["DEM: 10294060<br />REP:  5051610<br />COUNTY: 1 <br>Democrat votes: 10294060 <br>Republican votes: 5051610 <br>Total votes: 15345670<br />WINNER: DEM","DEM:    11087<br />REP:     5829<br />COUNTY: 2 <br>Democrat votes: 11087 <br>Republican votes: 5829 <br>Total votes: 16916<br />WINNER: DEM","DEM: 10507230<br />REP:  4132377<br />COUNTY: 7 <br>Democrat votes: 10507230 <br>Republican votes: 4132377 <br>Total votes: 14639607<br />WINNER: DEM","DEM:  7669680<br />REP:  7051013<br />COUNTY: 10 <br>Democrat votes: 7669680 <br>Republican votes: 7051013 <br>Total votes: 14720693<br />WINNER: DEM","DEM:  3125998<br />REP:  1593585<br />COUNTY: 12 <br>Democrat votes: 3125998 <br>Republican votes: 1593585 <br>Total votes: 4719583<br />WINNER: DEM","DEM:  1489405<br />REP:  1218557<br />COUNTY: 13 <br>Democrat votes: 1489405 <br>Republican votes: 1218557 <br>Total votes: 2707962<br />WINNER: DEM","DEM:  1021023<br />REP:   893971<br />COUNTY: 17 <br>Democrat votes: 1021023 <br>Republican votes: 893971 <br>Total votes: 1914994<br />WINNER: DEM","DEM: 94260435<br />REP: 46754984<br />COUNTY: 19 <br>Democrat votes: 94260435 <br>Republican votes: 46754984 <br>Total votes: 141015419<br />WINNER: DEM","DEM:  5248734<br />REP:  1159718<br />COUNTY: 21 <br>Democrat votes: 5248734 <br>Republican votes: 1159718 <br>Total votes: 6408452<br />WINNER: DEM","DEM:   761860<br />REP:   415083<br />COUNTY: 23 <br>Democrat votes: 761860 <br>Republican votes: 415083 <br>Total votes: 1176943<br />WINNER: DEM","DEM:   710017<br />REP:   683183<br />COUNTY: 24 <br>Democrat votes: 710017 <br>Republican votes: 683183 <br>Total votes: 1393200<br />WINNER: DEM","DEM:   152438<br />REP:   122579<br />COUNTY: 26 <br>Democrat votes: 152438 <br>Republican votes: 122579 <br>Total votes: 275017<br />WINNER: DEM","DEM:  3449676<br />REP:  1514129<br />COUNTY: 27 <br>Democrat votes: 3449676 <br>Republican votes: 1514129 <br>Total votes: 4963805<br />WINNER: DEM","DEM:   602558<br />REP:   249546<br />COUNTY: 28 <br>Democrat votes: 602558 <br>Republican votes: 249546 <br>Total votes: 852104<br />WINNER: DEM","DEM:  1374361<br />REP:  1052108<br />COUNTY: 29 <br>Democrat votes: 1374361 <br>Republican votes: 1052108 <br>Total votes: 2426469<br />WINNER: DEM","DEM: 16673382<br />REP: 16199331<br />COUNTY: 30 <br>Democrat votes: 16673382 <br>Republican votes: 16199331 <br>Total votes: 32872713<br />WINNER: DEM","DEM: 19527027<br />REP: 17361737<br />COUNTY: 33 <br>Democrat votes: 19527027 <br>Republican votes: 17361737 <br>Total votes: 36888764<br />WINNER: DEM","DEM: 11260290<br />REP:  6821701<br />COUNTY: 34 <br>Democrat votes: 11260290 <br>Republican votes: 6821701 <br>Total votes: 18081991<br />WINNER: DEM","DEM:   495076<br />REP:   419033<br />COUNTY: 35 <br>Democrat votes: 495076 <br>Republican votes: 419033 <br>Total votes: 914109<br />WINNER: DEM","DEM: 14824100<br />REP: 10666143<br />COUNTY: 37 <br>Democrat votes: 14824100 <br>Republican votes: 10666143 <br>Total votes: 25490243<br />WINNER: DEM","DEM:  3473586<br />REP:   889763<br />COUNTY: 38 <br>Democrat votes: 3473586 <br>Republican votes: 889763 <br>Total votes: 4363349<br />WINNER: DEM","DEM:  7374440<br />REP:  6576547<br />COUNTY: 39 <br>Democrat votes: 7374440 <br>Republican votes: 6576547 <br>Total votes: 13950987<br />WINNER: DEM","DEM:  4845435<br />REP:  4015252<br />COUNTY: 40 <br>Democrat votes: 4845435 <br>Republican votes: 4015252 <br>Total votes: 8860687<br />WINNER: DEM","DEM:  7175689<br />REP:  2597423<br />COUNTY: 41 <br>Democrat votes: 7175689 <br>Republican votes: 2597423 <br>Total votes: 9773112<br />WINNER: DEM","DEM:  4295556<br />REP:  2983119<br />COUNTY: 42 <br>Democrat votes: 4295556 <br>Republican votes: 2983119 <br>Total votes: 7278675<br />WINNER: DEM","DEM:  9281309<br />REP:  4413052<br />COUNTY: 43 <br>Democrat votes: 9281309 <br>Republican votes: 4413052 <br>Total votes: 13694361<br />WINNER: DEM","DEM:  3355392<br />REP:   852066<br />COUNTY: 44 <br>Democrat votes: 3355392 <br>Republican votes: 852066 <br>Total votes: 4207458<br />WINNER: DEM","DEM:  4845785<br />REP:  2744419<br />COUNTY: 48 <br>Democrat votes: 4845785 <br>Republican votes: 2744419 <br>Total votes: 7590204<br />WINNER: DEM","DEM:  5380494<br />REP:  1903838<br />COUNTY: 49 <br>Democrat votes: 5380494 <br>Republican votes: 1903838 <br>Total votes: 7284332<br />WINNER: DEM","DEM:  2630629<br />REP:  1877286<br />COUNTY: 56 <br>Democrat votes: 2630629 <br>Republican votes: 1877286 <br>Total votes: 4507915<br />WINNER: DEM","DEM:  4389376<br />REP:  2499981<br />COUNTY: 57 <br>Democrat votes: 4389376 <br>Republican votes: 2499981 <br>Total votes: 6889357<br />WINNER: DEM"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(96,144,247,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(96,144,247,1)"}},"hoveron":"points","name":"DEM","legendgroup":"DEM","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[5.430404039661024,6.2493986983192125,5.7867024548111559,5.0988167170489413,5.2710210138502349,6.3076757088039654,4.8221877006634086,5.2977123750381345,6.1540375926715649,5.8299704658470963,4.8912530382622483,4.9634194649786902,4.7343677196270333,6.5680386569608986,5.2581869536124453,7.0223033852744798,6.1893030241809619,4.131875187972593,5.6063265373464599,6.4726498366777498,5.9073323420903172,5.6873960663912815,5.5362856603864978,6.3761767838794157,5.7158747066045041,5.7214486897263344],"y":[5.7328808614744915,6.3507053377248406,6.0381677515319288,5.4499409887733377,5.3619845603393532,6.4289344232704595,5.1635012801890179,5.3444590830817358,6.1621621843015744,5.8761982044929706,5.4904627552145309,5.1953349792662396,5.2436629828955157,6.6780436734602588,5.4642599694337086,7.0850094984041698,6.5835288483821559,4.3438220107621612,5.8404956550532603,6.584456744475502,6.2479801365026608,6.1309288266323856,5.6068251076942364,6.4832888219946003,5.9549295985668733,5.9848561724975955],"text":["DEM:   269404<br />REP:   540606<br />COUNTY: 3 <br>Democrat votes: 269404 <br>Republican votes: 540606 <br>Total votes: 810010<br />WINNER: REP","DEM:  1775819<br />REP:  2242360<br />COUNTY: 4 <br>Democrat votes: 1775819 <br>Republican votes: 2242360 <br>Total votes: 4018179<br />WINNER: REP","DEM:   611931<br />REP:  1091862<br />COUNTY: 5 <br>Democrat votes: 611931 <br>Republican votes: 1091862 <br>Total votes: 1703793<br />WINNER: REP","DEM:   125550<br />REP:   281800<br />COUNTY: 6 <br>Democrat votes: 125550 <br>Republican votes: 281800 <br>Total votes: 407350<br />WINNER: REP","DEM:   186647<br />REP:   230136<br />COUNTY: 8 <br>Democrat votes: 186647 <br>Republican votes: 230136 <br>Total votes: 416783<br />WINNER: REP","DEM:  2030840<br />REP:  2684939<br />COUNTY: 9 <br>Democrat votes: 2030840 <br>Republican votes: 2684939 <br>Total votes: 4715779<br />WINNER: REP","DEM:    66403<br />REP:   145714<br />COUNTY: 11 <br>Democrat votes: 66403 <br>Republican votes: 145714 <br>Total votes: 212117<br />WINNER: REP","DEM:   198478<br />REP:   221034<br />COUNTY: 14 <br>Democrat votes: 198478 <br>Republican votes: 221034 <br>Total votes: 419512<br />WINNER: REP","DEM:  1425731<br />REP:  1452654<br />COUNTY: 15 <br>Democrat votes: 1425731 <br>Republican votes: 1452654 <br>Total votes: 2878385<br />WINNER: REP","DEM:   676037<br />REP:   751966<br />COUNTY: 16 <br>Democrat votes: 676037 <br>Republican votes: 751966 <br>Total votes: 1428003<br />WINNER: REP","DEM:    77849<br />REP:   309359<br />COUNTY: 18 <br>Democrat votes: 77849 <br>Republican votes: 309359 <br>Total votes: 387208<br />WINNER: REP","DEM:    91922<br />REP:   156796<br />COUNTY: 22 <br>Democrat votes: 91922 <br>Republican votes: 156796 <br>Total votes: 248718<br />WINNER: REP","DEM:    54246<br />REP:   175252<br />COUNTY: 25 <br>Democrat votes: 54246 <br>Republican votes: 175252 <br>Total votes: 229498<br />WINNER: REP","DEM:  3698611<br />REP:  4764789<br />COUNTY: 31 <br>Democrat votes: 3698611 <br>Republican votes: 4764789 <br>Total votes: 8463400<br />WINNER: REP","DEM:   181212<br />REP:   291246<br />COUNTY: 32 <br>Democrat votes: 181212 <br>Republican votes: 291246 <br>Total votes: 472458<br />WINNER: REP","DEM: 10526970<br />REP: 12162126<br />COUNTY: 36 <br>Democrat votes: 10526970 <br>Republican votes: 12162126 <br>Total votes: 22689096<br />WINNER: REP","DEM:  1546333<br />REP:  3832912<br />COUNTY: 45 <br>Democrat votes: 1546333 <br>Republican votes: 3832912 <br>Total votes: 5379245<br />WINNER: REP","DEM:    13548<br />REP:    22071<br />COUNTY: 46 <br>Democrat votes: 13548 <br>Republican votes: 22071 <br>Total votes: 35619<br />WINNER: REP","DEM:   403949<br />REP:   692621<br />COUNTY: 47 <br>Democrat votes: 403949 <br>Republican votes: 692621 <br>Total votes: 1096570<br />WINNER: REP","DEM:  2969271<br />REP:  3841110<br />COUNTY: 50 <br>Democrat votes: 2969271 <br>Republican votes: 3841110 <br>Total votes: 6810381<br />WINNER: REP","DEM:   807853<br />REP:  1770028<br />COUNTY: 51 <br>Democrat votes: 807853 <br>Republican votes: 1770028 <br>Total votes: 2577881<br />WINNER: REP","DEM:   486851<br />REP:  1351851<br />COUNTY: 52 <br>Democrat votes: 486851 <br>Republican votes: 1351851 <br>Total votes: 1838702<br />WINNER: REP","DEM:   343784<br />REP:   404413<br />COUNTY: 53 <br>Democrat votes: 343784 <br>Republican votes: 404413 <br>Total votes: 748197<br />WINNER: REP","DEM:  2377808<br />REP:  3042908<br />COUNTY: 54 <br>Democrat votes: 2377808 <br>Republican votes: 3042908 <br>Total votes: 5420716<br />WINNER: REP","DEM:   519846<br />REP:   901425<br />COUNTY: 55 <br>Democrat votes: 519846 <br>Republican votes: 901425 <br>Total votes: 1421271<br />WINNER: REP","DEM:   526561<br />REP:   965731<br />COUNTY: 58 <br>Democrat votes: 526561 <br>Republican votes: 965731 <br>Total votes: 1492292<br />WINNER: REP"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(250,110,82,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(250,110,82,1)"}},"hoveron":"points","name":"REP","legendgroup":"REP","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":54.794520547945211},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724},"title":{"text":"Association: dem and rep vote (county lvl)","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[3.8483382779229496,8.1708052092481012],"tickmode":"array","ticktext":["1e+04","1e+05","1e+06","1e+07","1e+08"],"tickvals":[4,5,6,7,8],"categoryorder":"array","categoryarray":["1e+04","1e+05","1e+06","1e+07","1e+08"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"Arial","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"# of Democrat votes","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[3.570382362449775,7.865039605582516],"tickmode":"array","ticktext":["1e+04","1e+05","1e+06","1e+07"],"tickvals":[4,5,6,7],"categoryorder":"array","categoryarray":["1e+04","1e+05","1e+06","1e+07"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"Arial","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"# of Republican votes","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"Arial","size":11.68949771689498},"title":{"text":"WINNER","font":{"color":"rgba(0,0,0,1)","family":"Arial","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"64132ad8c0a1":{"x":{},"y":{},"type":"scatter"},"64137c4ea000":{"x":{},"y":{},"text":{},"colour":{}}},"cur_data":"64132ad8c0a1","visdat":{"64132ad8c0a1":["function (y) ","x"],"64137c4ea000":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="question-6" class="level3">
+<h3 class="anchored" data-anchor-id="question-6">Question 6:</h3>
+<p><em>What is the county with the highest number of republican votes given their number of democrat votes ?</em></p>
+</section>
+<section id="answer-6" class="level3">
+<h3 class="anchored" data-anchor-id="answer-6">Answer 6:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>county_level <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()<span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">residual =</span> <span class="fu">resid</span>(m1))<span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(residual))<span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(COUNTY)<span class="sc">|&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+  COUNTY
+   &lt;int&gt;
+1     30</code></pre>
+</div>
+</div>
+<p>The Orange county has the highest number of republican votes given democrat votes ! Not surprising given the disparity of this LA county.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
